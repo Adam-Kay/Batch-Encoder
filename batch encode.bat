@@ -39,7 +39,7 @@ set "INPUTFILE="
 		) else (
 			set /a "COUNTER+=1" 
 			echo Encoding !COUNTER! of %TOTAL%
-			echo ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+			echo **********************************
 				
 			set "TESTSTRING=!INPUTFILE:~-4!"
 			if /i NOT "!TESTSTRING!"==".mp4" (
@@ -61,14 +61,16 @@ set "INPUTFILE="
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
-				del "!INPUTFILE!"
+				
+				REM delete to recycle bin
+				powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
 			)
 		)
 	)
 	
 cls
 echo Completed encoding %TOTAL% files.
-echo ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+echo **********************************
 	
 :EndPause
 	pause
