@@ -26,26 +26,35 @@ set "INPUTFILE="
 	
 		REM echo %%f
 		REM echo %~n0%~x0
-		REM echo pause
-		
 		REM pause
+		
+		
+		cls
+		
+		set "INPUTFILE=%%f"
 	
 		if /i "%%f"=="%~n0%~x0" (
-			echo skipping self
-			timeout 1
+			echo Skipping self.
+			timeout 2
 		) else (
 			set /a "COUNTER+=1" 
-			set "INPUTFILE=%%f"
-			set "TESTSTRING=!INPUTFILE:~-8!"
-			if /i "!TESTSTRING!"==".DVR.mp4" (
-				set "OUTPUTFILE=!INPUTFILE:~0,-8!.ENC.mp4"
-			) else (
-				set "OUTPUTFILE=!INPUTFILE:~0,-4!.ENC.mp4"
-			)
-			
-				cls
-				echo Encoding !COUNTER! of %TOTAL%
-				echo ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+			echo Encoding !COUNTER! of %TOTAL%
+			echo ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+				
+			set "TESTSTRING=!INPUTFILE:~-4!"
+			if /i NOT "!TESTSTRING!"==".mp4" (
+				echo Skipping unsupported file^: ^(!INPUTFILE!^)
+				timeout 3
+			) else ( 
+				set "TESTSTRING=!INPUTFILE:~-8!"
+				if /i "!TESTSTRING!"==".DVR.mp4" (
+					set "OUTPUTFILE=!INPUTFILE:~0,-8!.ENC.mp4"
+				) else (
+					set "OUTPUTFILE=!INPUTFILE:~0,-4!.ENC.mp4"
+				)
+				
+				echo Supported file found^: ^(!INPUTFILE!^)
+				
 				timeout /t 5
 			
 				%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
@@ -53,6 +62,7 @@ set "INPUTFILE="
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
 				del "!INPUTFILE!"
+			)
 		)
 	)
 	
