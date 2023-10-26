@@ -12,6 +12,7 @@ SET version=v1.3.6
 	goto AskProceed
 
 :AskLocation
+	rem TODO: detect FFMPEG if in same folder
 	SET /P "LOCATION=Where is FFMPEG.exe located? [paste full path]: "
 	
 set /a "COUNTER=-1" 
@@ -48,6 +49,7 @@ set "INPUTFILE="
 			if /i NOT "!TESTSTRING!"==".mp4" (
 				echo Skipping unsupported file^: ^(!INPUTFILE!^)
 				timeout 3
+				rem TODO: detect if unsupported is folder and change text appropriately, also discount from counter since that only counts files.
 			) else ( 
 				set "TESTSTRING=!INPUTFILE:~-8!"
 				if /i "!TESTSTRING!"==".DVR.mp4" (
