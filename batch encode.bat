@@ -1,8 +1,11 @@
 @echo off
 setlocal enabledelayedexpansion
 
+SET version=v1.3.6
+
 :AskProceed
-cls
+	cls
+	echo Batch Encoder %version%
 	SET /P "CONFIRMATION=This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals. Do you want to proceed? [Y/N] : "
 	IF /i "%CONFIRMATION%"=="n" exit
 	IF /i "%CONFIRMATION%"=="y" (goto AskLocation)
