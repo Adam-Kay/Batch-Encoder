@@ -58,6 +58,9 @@ set "INPUTFILE="
 				timeout /t 5
 			
 				%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
+				
+				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
+				
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
@@ -74,3 +77,11 @@ echo **********************************
 	
 :EndPause
 	pause
+	exit
+	
+:CritError
+	echo.
+	echo.
+	echo *******************************************************
+	echo A critical error occurred. No files have been modified.
+	goto EndPause
