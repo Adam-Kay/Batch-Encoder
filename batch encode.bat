@@ -11,6 +11,9 @@ SET version=v1.3.7
 	IF /i "%CONFIRMATION%"=="y" (goto AskLocation)
 	goto AskProceed
 
+:AskUpdate
+	
+
 :AskLocation
 	rem TODO: detect FFMPEG if in same folder
 	SET /P "LOCATION=Where is FFMPEG.exe located? [paste full path]: "
@@ -90,3 +93,6 @@ echo **********************************
 	echo *******************************************************
 	echo A critical error occurred. No files have been modified.
 	goto EndPause
+	
+:AutoUpdateError
+	
