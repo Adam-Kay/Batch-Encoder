@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.3.7
+SET CurrentVersion=v1.4
 
 echo %1
 if /i "%1"=="--updated-from" (
@@ -54,7 +54,8 @@ if /i "%1"=="--updated-from" (
 		echo.
 		echo Download complete. The program will now clean up and restart.
 		pause
-		(goto) 2>nul & start "" "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
+		del "batch_update.txt"
+		(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
 	)
 
 :FFMPEGLocation
