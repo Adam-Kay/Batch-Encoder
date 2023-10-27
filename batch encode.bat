@@ -1,9 +1,9 @@
-@echo on
+@echo off
 setlocal enabledelayedexpansion
 
 SET version=v1.3.7
 
-if /i %1="-updated" (del %2)
+rem if /i %1="-updated" del %2
 
 :AskProceed
 	cls
@@ -23,16 +23,19 @@ if /i %1="-updated" (del %2)
 	
 :AutoUpdate
 	curl -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
-	<batch_update.txt (
-    set /p UpdateVersion= 
-    set /p UpdateAPIURL=
-    set /p UpdateBrowserURL=
-)
+	pause
+	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
+		set UpdateVersion=%%A
+		set UpdateAPIURL=%%B
+		set UpdateBrowserURL=%%C
+	)
 
-REM Removing line breaks at the end of strings
-set UpdateVersion=%UpdateVersion:~0,-1%
-set UpdateAPIURL=%UpdateAPIURL:~0,-1%
-set UpdateBrowserURL=%UpdateBrowserURL:~0,-1%
+	if not defined UpdateVersion (
+		echo There was a problem with the auto-updater. Restarting program...
+		echo.
+		pause
+		goto AskProceed
+	)
 
 	echo New Version: %UpdateVersion%
 	curl -L -H "Accept: application/octet-stream" -o "batch encode %UpdateVersion%.bat" %UpdateAPIURL%
