@@ -4,28 +4,29 @@ setlocal enabledelayedexpansion
 SET version=v1.3.7
 
 echo %1
-if /i %1==--updated-from (
+if /i "%1"=="--updated-from" (
 	del %2
 )
+
 	
 :AskProceed
-	cls
-	echo Batch Encoder %version%
+	call:ClearAndTitle
 	SET /P "CONFIRMATION=This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals. Do you want to proceed? [Y/N] : "
 	IF /i "%CONFIRMATION%"=="n" exit
 	IF /i "%CONFIRMATION%"=="y" (goto AskUpdate)
 	goto AskProceed
 
 :AskUpdate
-	cls
-	echo Batch Encoder %version%
+	call:ClearAndTitle
 	SET /P "CONFIRMATION=Would you like to check for an update? [Y/N] : "
 	IF /i "%CONFIRMATION%"=="n" (goto FFMPEGLocation)
 	IF /i "%CONFIRMATION%"=="y" (goto AutoUpdate)
 	goto AskUpdate
 	
 :AutoUpdate
-	curl -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
+	call:ClearAndTitle
+	echo Downloading information...
+	curl -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw -q
 	pause
 	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
 		set UpdateVersion=%%A
@@ -33,12 +34,8 @@ if /i %1==--updated-from (
 		set UpdateBrowserURL=%%C
 	)
 
-	if not defined UpdateVersion (
-		echo There was a problem with the auto-updater. Restarting program...
-		echo.
-		pause
-		goto AskProceed
-	)
+	rem Test if any of them are blank
+	for %%a in (UpdateVersion, UpdateAPIURL, UpdateBrowserURL) do if not defined %%a goto AutoUpdateError
 
 	echo New Version: %UpdateVersion%
 	curl -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
@@ -126,4 +123,13 @@ echo **********************************
 	goto EndPause
 	
 :AutoUpdateError
-	
+	echo.
+	echo There was a problem with the auto-updater. Restarting program...
+	echo.
+	pause
+	goto AskProceed
+
+:ClearAndTitle
+	cls
+	echo Batch Encoder %version%
+	goto:eof
