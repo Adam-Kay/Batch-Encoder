@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET version=v1.3.7
+SET CurrentVersion=v1.3.7
 
 echo %1
 if /i "%1"=="--updated-from" (
@@ -26,7 +26,7 @@ if /i "%1"=="--updated-from" (
 :AutoUpdate
 	call:ClearAndTitle
 	echo Downloading information...
-	curl -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw -q
+	curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
 	pause
 	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
 		set UpdateVersion=%%A
@@ -37,10 +37,26 @@ if /i "%1"=="--updated-from" (
 	rem Test if any of them are blank
 	for %%a in (UpdateVersion, UpdateAPIURL, UpdateBrowserURL) do if not defined %%a goto AutoUpdateError
 
-	echo New Version: %UpdateVersion%
-	curl -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
-	pause
-	exit
+	echo.
+	if /i "%UpdateVersion%"=="%CurrentVersion%" (
+		echo Current version is up-to-date.
+		echo.
+		echo Restarting program...
+		echo.
+		pause
+		goto AskProceed
+	) else (
+		echo Differing version found^^! ^(%CurrentVersion% → %UpdateVersion%^)
+		echo Proceeding with update in 5 seconds, press CTRL+C or close window to cancel.
+		echo.
+		timeout /nobreak /t 5 > nul
+		echo Downloading files...
+		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
+		echo.
+		echo Download complete. The program will now clean up and restart.
+		pause
+		exit
+	)
 
 :FFMPEGLocation
 	rem TODO: detect FFMPEG if in same folder
@@ -131,5 +147,5 @@ echo **********************************
 
 :ClearAndTitle
 	cls
-	echo Batch Encoder %version%
+	echo Batch Encoder %CurrentVersion%
 	goto:eof
