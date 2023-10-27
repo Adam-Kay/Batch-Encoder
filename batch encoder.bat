@@ -27,7 +27,6 @@ if /i "%1"=="--updated-from" (
 	call:ClearAndTitle
 	echo Downloading information...
 	curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
-	pause
 	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
 		set UpdateVersion=%%A
 		set UpdateAPIURL=%%B
@@ -55,7 +54,7 @@ if /i "%1"=="--updated-from" (
 		echo.
 		echo Download complete. The program will now clean up and restart.
 		pause
-		exit
+		(goto) 2>nul & start "" "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
 	)
 
 :FFMPEGLocation
