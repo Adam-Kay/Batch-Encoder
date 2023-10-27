@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET version=v1.3.6
+SET version=v1.3.7
 
 :AskProceed
 	cls
