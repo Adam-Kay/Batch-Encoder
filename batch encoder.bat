@@ -41,7 +41,7 @@ if /i %1==--updated-from (
 	)
 
 	echo New Version: %UpdateVersion%
-	curl -L -H "Accept: application/octet-stream" -o "batch encode %UpdateVersion%.bat" %UpdateAPIURL%
+	curl -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
 	pause
 	exit
 
