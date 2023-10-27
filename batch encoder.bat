@@ -3,8 +3,10 @@ setlocal enabledelayedexpansion
 
 SET CurrentVersion=v1.4
 
-echo %1
+cls
 if /i "%1"=="--updated-from" (
+	echo Just updated^^! Running cleanup...
+	timeout 1
 	del %2
 )
 
