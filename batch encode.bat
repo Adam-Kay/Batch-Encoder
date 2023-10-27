@@ -3,8 +3,11 @@ setlocal enabledelayedexpansion
 
 SET version=v1.3.7
 
-rem if /i %1="-updated" del %2
-
+echo %1
+if /i %1==--updated-from (
+	del %2
+)
+	
 :AskProceed
 	cls
 	echo Batch Encoder %version%
