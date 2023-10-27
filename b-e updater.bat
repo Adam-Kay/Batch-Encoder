@@ -2,10 +2,37 @@
 	cls
 	SET /P "CONFIRMATION=This program will attempt to forcibly update the batch encoder script. Do you want to proceed? [Y/N] : "
 	IF /i "%CONFIRMATION%"=="n" exit
-	IF /i "%CONFIRMATION%"=="y" (goto Update)
+	IF /i "%CONFIRMATION%"=="y" (goto AskFile)
 	goto AskProceed
 	
+	
+:AskFile
+	cls
+	set CONFIRMATION=
+	for %%f in (batch*encode*.bat) do (
+		SET /P "CONFIRMATION=Is this the current batch encoder script file?: %%f [Y/N] : "
+		IF /i "%CONFIRMATION%"=="y" (
+			set BEFile=%%f
+			goto Update
+		)
+		IF /i "%CONFIRMATION%"=="n" (
+			echo Trying next file...
+			echo.
+		) else (
+			echo Unknown response. Restarting.
+			goto AskFile
+		)
+	)
+	
+:AskAnyway
+	echo Unable to find batch encoder script. Would you like to download the latest file anyway? [Y/N] : "
+	IF /i "%CONFIRMATION%"=="n" exit
+	IF /i "%CONFIRMATION%"=="y" (goto AskFile)
+	goto AskAnyway
+
+
 :Update
+	cls
 	echo Downloading information...
 	curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
 	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
@@ -27,7 +54,7 @@
 	echo.
 	echo Download complete. The program will now clean up and restart.
 	pause
-	
+	if defined BEFile del "%BEFile%"
 	del "batch_update.txt"
 	(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
 	
