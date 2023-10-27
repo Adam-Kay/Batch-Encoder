@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.4
+SET CurrentVersion=v1.4.1
 
 cls
 if /i "%1"=="--updated-from" (
@@ -45,6 +45,7 @@ if /i "%1"=="--updated-from" (
 		echo Restarting program...
 		echo.
 		pause
+		del "batch_update.txt"
 		goto AskProceed
 	) else (
 		echo Differing version found^^! ^(%CurrentVersion% → %UpdateVersion%^)

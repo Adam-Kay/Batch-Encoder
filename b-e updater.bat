@@ -1,8 +1,11 @@
+@echo off
+setlocal enabledelayedexpansion
+
 :AskProceed
 	cls
-	SET /P "CONFIRMATION=This program will attempt to forcibly update the batch encoder script. Do you want to proceed? [Y/N] : "
-	IF /i "%CONFIRMATION%"=="n" exit
-	IF /i "%CONFIRMATION%"=="y" (goto AskFile)
+	SET /p "ProceedConf=This program will attempt to forcibly update the batch encoder script. Do you want to proceed? [Y/N] : "
+	IF /i "%ProceedConf%"=="n" exit
+	IF /i "%ProceedConf%"=="y" (goto AskFile)
 	goto AskProceed
 	
 	
@@ -10,24 +13,25 @@
 	cls
 	set CONFIRMATION=
 	for %%f in (batch*encode*.bat) do (
-		SET /P "CONFIRMATION=Is this the current batch encoder script file?: %%f [Y/N] : "
-		IF /i "%CONFIRMATION%"=="y" (
+		SET /p "FileConf=Is this the current batch encoder script file?: %%f [Y/N] : "
+		IF /i "!FileConf!"=="y" (
 			set BEFile=%%f
 			goto Update
 		)
-		IF /i "%CONFIRMATION%"=="n" (
+		IF /i "!FileConf!"=="n" (
 			echo Trying next file...
 			echo.
 		) else (
-			echo Unknown response. Restarting.
+			echo Unknown response '!FileConf!'. Restarting.
+			pause
 			goto AskFile
 		)
 	)
 	
 :AskAnyway
-	echo Unable to find batch encoder script. Would you like to download the latest file anyway? [Y/N] : "
-	IF /i "%CONFIRMATION%"=="n" exit
-	IF /i "%CONFIRMATION%"=="y" (goto AskFile)
+	SET /p "AnywayConf=Unable to find batch encoder script. Would you like to download the latest file anyway? [Y/N] : "
+	IF /i "%AnywayConf%"=="n" exit
+	IF /i "%AnywayConf%"=="y" (goto Update)
 	goto AskAnyway
 
 
@@ -54,7 +58,11 @@
 	echo.
 	echo Download complete. The program will now clean up and restart.
 	pause
-	if defined BEFile del "%BEFile%"
+	if defined BEFile (
+		if not "%BEFile%"=="batch encoder %UpdateVersion%.bat" (
+			del "%BEFile%"
+		)
+	)
 	del "batch_update.txt"
 	(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
 	
