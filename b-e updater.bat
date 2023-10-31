@@ -12,7 +12,7 @@ setlocal enabledelayedexpansion
 :AskFile
 	cls
 	set CONFIRMATION=
-	for %%f in (batch*encode*.bat) do (
+	for %%f in (*batch*encode*.bat) do (
 		SET /p "FileConf=Is this the current batch encoder script file?: '%%f' [Y/N] : "
 		IF /i "!FileConf!"=="y" (
 			set BEFile=%%f
