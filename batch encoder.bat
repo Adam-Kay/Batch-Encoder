@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.4.1
+SET CurrentVersion=v1.4.2
 
 cls
 if /i "%1"=="--updated-from" (
