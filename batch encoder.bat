@@ -48,7 +48,7 @@ if /i "%1"=="--updated-from" (
 		del "batch_update.txt"
 		goto AskProceed
 	) else (
-		echo Differing version found^^! ^(%CurrentVersion% → %UpdateVersion%^)
+		echo Differing version found^^! ^(%CurrentVersion% -^> %UpdateVersion%^)
 		echo Proceeding with update in 5 seconds, press CTRL+C or close window to cancel.
 		echo.
 		timeout /nobreak /t 5 > nul
