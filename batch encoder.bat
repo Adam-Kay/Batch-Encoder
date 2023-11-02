@@ -76,7 +76,7 @@ set /a "COUNTER=0"
 set "INPUTFILE="
 
 :Conversion
-	for /f "usebackq delims=|" %%f in (`dir /b ""`) do (
+	for %f in (.\*) do (
 	
 		REM echo %%f
 		REM echo %~n0%~x0
