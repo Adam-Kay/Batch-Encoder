@@ -68,7 +68,7 @@ if /i "%1"=="--updated-from" (
 set /a "COUNTER=-1" 
 
 :Count
-	for /f "usebackq delims=|" %%f in (`dir /b ""`) do set /a "COUNTER+=1"
+	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
 	REM echo %TOTAL%
 	
@@ -76,7 +76,7 @@ set /a "COUNTER=0"
 set "INPUTFILE="
 
 :Conversion
-	for %f in (.\*) do (
+	for %%f in (.\*) do (
 	
 		REM echo %%f
 		REM echo %~n0%~x0
