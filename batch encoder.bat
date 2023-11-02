@@ -91,37 +91,42 @@ set "INPUTFILE="
 			echo Skipping self.
 			timeout 2
 		) else (
-			set /a "COUNTER+=1" 
-			echo Encoding !COUNTER! of %TOTAL%
-			echo **********************************
+			if exist "%%f\" (
+				echo Skipping folder.
+				timeout 2
+			) else (
+				set /a "COUNTER+=1" 
+				echo Encoding !COUNTER! of %TOTAL%
+				echo **********************************
+					
+				set "TESTSTRING=!INPUTFILE:~-4!"
+				if /i NOT "!TESTSTRING!"==".mp4" (
+					echo Skipping unsupported file^: ^(!INPUTFILE!^)
+					timeout 3
+					rem TODO: detect if unsupported is folder and change text appropriately, also discount from counter since that only counts files.
+				) else ( 
+					set "TESTSTRING=!INPUTFILE:~-8!"
+					if /i "!TESTSTRING!"==".DVR.mp4" (
+						set "OUTPUTFILE=!INPUTFILE:~0,-8!.ENC.mp4"
+					) else (
+						set "OUTPUTFILE=!INPUTFILE:~0,-4!.ENC.mp4"
+					)
+					
+					echo Supported file found^: ^(!INPUTFILE!^)
+					
+					timeout /t 5
 				
-			set "TESTSTRING=!INPUTFILE:~-4!"
-			if /i NOT "!TESTSTRING!"==".mp4" (
-				echo Skipping unsupported file^: ^(!INPUTFILE!^)
-				timeout 3
-				rem TODO: detect if unsupported is folder and change text appropriately, also discount from counter since that only counts files.
-			) else ( 
-				set "TESTSTRING=!INPUTFILE:~-8!"
-				if /i "!TESTSTRING!"==".DVR.mp4" (
-					set "OUTPUTFILE=!INPUTFILE:~0,-8!.ENC.mp4"
-				) else (
-					set "OUTPUTFILE=!INPUTFILE:~0,-4!.ENC.mp4"
+					%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
+					
+					if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
+					
+					powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
+					powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
+					powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
+					
+					REM delete to recycle bin
+					powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
 				)
-				
-				echo Supported file found^: ^(!INPUTFILE!^)
-				
-				timeout /t 5
-			
-				%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
-				
-				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
-				
-				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
-				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
-				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
-				
-				REM delete to recycle bin
-				powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
 			)
 		)
 	)
