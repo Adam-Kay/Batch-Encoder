@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.4.3
+SET CurrentVersion=v1.4.3.1
 
 cls
 if /i "%1"=="--updated-from" (
@@ -68,13 +68,8 @@ if /i "%1"=="--updated-from" (
 set /a "COUNTER=-1" 
 
 :Count
-	for %%f in (.\*) do (
-		set /a "COUNTER+=1"
-		echo %%f
-	)
+	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
-	echo %TOTAL%
-	pause
 	
 set /a "COUNTER=0"
 set "INPUTFILE="
