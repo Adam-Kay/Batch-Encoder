@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.4.3.1
+SET CurrentVersion=v1.4.4
 
 cls
 if /i "%1"=="--updated-from" (
@@ -95,7 +95,6 @@ set "INPUTFILE="
 			if /i NOT "!TESTSTRING!"==".mp4" (
 				echo Skipping unsupported file^: ^(!INPUTFILE!^)
 				timeout 3
-				rem TODO: detect if unsupported is folder and change text appropriately, also discount from counter since that only counts files.
 			) else ( 
 				set "TESTSTRING=!INPUTFILE:~-8!"
 				if /i "!TESTSTRING!"==".DVR.mp4" (
@@ -110,7 +109,26 @@ set "INPUTFILE="
 			
 				%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
 				
+				echo.
+				echo.
+				echo Performing file checks:
+				echo ***********************
+				echo.
+				
+				echo Checking for output file...
 				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
+				echo - Output file exists^^!
+				echo.
+				
+				echo Checking output file length...
+				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"') do (SET LEN_INP=%%g)
+				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LEN_OUT=%%g)
+				echo Input file: !LEN_INP! - Output file: !LEN_OUT!
+				if /i NOT "!LEN_INP!"=="!LEN_OUT!" goto CritError
+				echo - File lengths match^^!
+				echo.
+				echo Safely proceeding with input file recycling...
+				timeout /nobreak /t 1 > nul
 				
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
@@ -134,7 +152,7 @@ echo **********************************
 	echo.
 	echo.
 	echo *******************************************************
-	echo A critical error occurred. No files have been modified.
+	echo A critical error occurred. The latest file has not been modified.
 	goto EndPause
 	
 :AutoUpdateError
