@@ -13,7 +13,8 @@ if /i "%1"=="--updated-from" (
 	
 :AskProceed
 	call:ClearAndTitle
-	SET /P "CONFIRMATION=This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals. Do you want to proceed? [Y/N] : "
+	echo This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals. 
+	SET /P "CONFIRMATION=Do you want to proceed? [Y/N] : "
 	IF /i "%CONFIRMATION%"=="n" exit
 	IF /i "%CONFIRMATION%"=="y" (goto AskUpdate)
 	goto AskProceed
