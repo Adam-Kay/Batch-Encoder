@@ -114,8 +114,8 @@ set "INPUTFILE="
 				
 				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"') do (SET LENONE=%%g)
 				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LENTWO=%%g)
-				echo %LENONE%
-				echo %LENTWO%
+				echo !LENONE!
+				echo !LENTWO!
 				pause
 				
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
