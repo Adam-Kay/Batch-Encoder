@@ -115,16 +115,16 @@ set "INPUTFILE="
 				echo ***********************
 				echo.
 				
-				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
 				echo Checking for output file...
+				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
 				echo - Output file exists^^!
 				echo.
 				
 				echo Checking output file length...
-				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"') do (SET LENONE=%%g)
-				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LENTWO=%%g)
-				echo Input file: !LENONE! - Output file: !LENTWO!
-				if /i NOT "!LENONE!"=="!LENTWO!" goto CritError
+				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"') do (SET LEN_INP=%%g)
+				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LEN_OUT=%%g)
+				echo Input file: !LEN_INP! - Output file: !LEN_OUT!
+				if /i NOT "!LEN_INP!"=="!LEN_OUT!" goto CritError
 				echo - File lengths match^^!
 				echo.
 				echo Safely proceeding with input file recycling...
