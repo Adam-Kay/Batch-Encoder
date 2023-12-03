@@ -110,13 +110,15 @@ set "INPUTFILE="
 			
 				%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
 				
+				echo.
+				echo.
 				echo Performing file checks:
 				echo ***********************
 				echo.
 				
 				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
 				echo Checking for output file...
-				echo - Output file exists!
+				echo - Output file exists^!
 				echo.
 				
 				echo Checking output file length...
@@ -124,7 +126,7 @@ set "INPUTFILE="
 				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LENTWO=%%g)
 				echo Input file: !LENONE! - Output file: !LENTWO!
 				if /i NOT "!LENONE!"=="!LENTWO!" goto CritError
-				echo - File lengths match!
+				echo - File lengths match^!
 				echo.
 				echo Safely proceeding with input file recycling...
 				pause
@@ -151,7 +153,7 @@ echo **********************************
 	echo.
 	echo.
 	echo *******************************************************
-	echo A critical error occurred. No files have been modified.
+	echo A critical error occurred. The latest file has not been modified.
 	goto EndPause
 	
 :AutoUpdateError
