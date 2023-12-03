@@ -110,12 +110,23 @@ set "INPUTFILE="
 			
 				%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
 				
-				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
+				echo Performing file checks:
+				echo ***********************
+				echo.
 				
+				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
+				echo Checking for output file...
+				echo - Output file exists!
+				echo.
+				
+				echo Checking output file length...
 				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"') do (SET LENONE=%%g)
 				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LENTWO=%%g)
-				echo !LENONE!
-				echo !LENTWO!
+				echo Input file: !LENONE! - Output file: !LENTWO!
+				if /i NOT "!LENONE!"=="!LENTWO!" goto CritError
+				echo - File lengths match!
+				echo.
+				echo Safely proceeding with input file recycling...
 				pause
 				
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
