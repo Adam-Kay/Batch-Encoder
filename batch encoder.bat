@@ -95,7 +95,6 @@ set "INPUTFILE="
 			if /i NOT "!TESTSTRING!"==".mp4" (
 				echo Skipping unsupported file^: ^(!INPUTFILE!^)
 				timeout 3
-				rem TODO: detect if unsupported is folder and change text appropriately, also discount from counter since that only counts files.
 			) else ( 
 				set "TESTSTRING=!INPUTFILE:~-8!"
 				if /i "!TESTSTRING!"==".DVR.mp4" (
@@ -118,7 +117,7 @@ set "INPUTFILE="
 				
 				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
 				echo Checking for output file...
-				echo - Output file exists^!
+				echo - Output file exists^^!
 				echo.
 				
 				echo Checking output file length...
@@ -126,10 +125,10 @@ set "INPUTFILE="
 				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LENTWO=%%g)
 				echo Input file: !LENONE! - Output file: !LENTWO!
 				if /i NOT "!LENONE!"=="!LENTWO!" goto CritError
-				echo - File lengths match^!
+				echo - File lengths match^^!
 				echo.
 				echo Safely proceeding with input file recycling...
-				pause
+				timeout /nobreak /t 1 > nul
 				
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
