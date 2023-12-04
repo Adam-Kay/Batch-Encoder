@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.4.4
+SET CurrentVersion=v1.4.5
 
 cls
 if /i "%1"=="--updated-from" (
@@ -108,7 +108,7 @@ set "INPUTFILE="
 				
 				timeout /t 5
 			
-				%LOCATION% -i "%CD%\!INPUTFILE!" "%CD%\!OUTPUTFILE!"
+				%LOCATION% -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
 				
 				echo.
 				echo.
