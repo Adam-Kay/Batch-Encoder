@@ -32,10 +32,12 @@ if /i "%1"=="--updated-from" (
 	curl -L -H "Accept: application/vnd.github+json" -o batch_update.json https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
 	
-	>%TEMP%\batch_update.tmp findstr "prerelease" batch_update.json
-	<%TEMP%\batch_update.tmp set /p "prerelease_entry="
-	set "prerelease=%prerelease_entry:~16,-1%"
-	echo prerelease? : %prerelease%
+	>%TEMP%\batch_update.tmp findstr "tag_name" batch_update.json
+	<%TEMP%\batch_update.tmp set /p "ver_entry="
+	set "ver=%ver_entry:~15,-2%"
+	echo ver : %ver%
+	set "UpdateVersion=%ver:~1%"
+	echo ver2 : %UpdateVersion%
 	pause
 	
 	
