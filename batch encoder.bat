@@ -29,7 +29,15 @@ if /i "%1"=="--updated-from" (
 :AutoUpdate
 	call:ClearAndTitle
 	echo Downloading information...
-	curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
+	curl -L -H "Accept: application/vnd.github+json" -o batch_update.json https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
+	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
+	
+	>%TEMP%\foo.tmp findstr "prerelease" batch_update.json
+	<%TEMP%\foo.tmp set /p "prerelease="
+	echo %prerelease%
+	pause
+	
+	
 	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
 		set UpdateVersion=%%A
 		set UpdateAPIURL=%%B
@@ -46,7 +54,7 @@ if /i "%1"=="--updated-from" (
 		echo Restarting program...
 		echo.
 		pause
-		del "batch_update.txt"
+		del "batch_update.json"
 		goto AskProceed
 	) else (
 		echo Differing version found^^! ^(%CurrentVersion% -^> %UpdateVersion%^)
