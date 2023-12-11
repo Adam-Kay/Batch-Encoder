@@ -45,7 +45,7 @@ setlocal enabledelayedexpansion
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
 	set "ver=%ver_entry:~15,-2%"
-	set "UpdateVersion=%ver:~1%"
+	set "UpdateVersion=v%ver:~1%"
 	
 	set regex_command=powershell -Command "$x = Get-Content %updateFileName% -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
@@ -59,7 +59,7 @@ setlocal enabledelayedexpansion
 	echo.
 	timeout /nobreak /t 5 > nul
 	echo Downloading files...
-	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder v%UpdateVersion%.bat" %UpdateAPIURL%
+	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
 	echo.
 	echo Download complete. The program will now clean up and restart.
 	pause
@@ -69,7 +69,7 @@ setlocal enabledelayedexpansion
 		)
 	)
 	del "%updateFileName%"
-	(goto) 2>nul & "batch encoder v%UpdateVersion%.bat" --updated-from "%~f0"
+	(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
 	
 :AutoUpdateError
 	del "%updateFileName%"

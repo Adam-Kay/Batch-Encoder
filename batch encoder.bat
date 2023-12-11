@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.5.0-alpha3
+SET CurrentVersion=v1.5.0-alpha4
 
 cls
 if /i "%1"=="--updated-from" (
@@ -36,7 +36,7 @@ if /i "%1"=="--updated-from" (
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
 	set "ver=%ver_entry:~15,-2%"
-	set "UpdateVersion=%ver:~1%"
+	set "UpdateVersion=v%ver:~1%"
 	
 	set regex_command=powershell -Command "$x = Get-Content %updateFileName% -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
@@ -45,7 +45,7 @@ if /i "%1"=="--updated-from" (
 
 	for %%a in (ver_entry, API_link_entry, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
 	
-	if exist "batch encoder v%UpdateVersion%.bat" set "append=_new"
+	if exist "batch encoder %UpdateVersion%.bat" set "append=_new"
 
 	echo.
 	if /i "%UpdateVersion%"=="%CurrentVersion%" (
@@ -54,7 +54,7 @@ if /i "%1"=="--updated-from" (
 		echo Restarting program...
 		echo.
 		pause
-		del "batch_update.json"
+		del "%updateFileName%"
 		goto AskProceed
 	) else (
 		echo Differing version found^^! ^(%CurrentVersion% -^> %UpdateVersion%^)
@@ -62,12 +62,12 @@ if /i "%1"=="--updated-from" (
 		echo.
 		timeout /nobreak /t 5 > nul
 		echo Downloading files...
-		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder v%UpdateVersion%%append%.bat" %UpdateAPIURL%
+		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%.bat" %UpdateAPIURL%
 		echo.
 		echo Download complete. The program will now clean up and restart.
 		pause
 		del "%updateFileName%"
-		(goto) 2>nul & "batch encoder v%UpdateVersion%%append%.bat" --updated-from "%~f0"
+		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
 	)
 
 :FFMPEGLocation
