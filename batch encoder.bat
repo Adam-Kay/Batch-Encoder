@@ -44,6 +44,8 @@ if /i "%1"=="--updated-from" (
 
 	rem Test if any of them are blank
 	for %%a in (UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
+	
+	if exist "batch encoder v%UpdateVersion%.bat" set "append=_new"
 
 	echo.
 	if /i "%UpdateVersion%"=="%CurrentVersion%" (
@@ -60,12 +62,12 @@ if /i "%1"=="--updated-from" (
 		echo.
 		timeout /nobreak /t 5 > nul
 		echo Downloading files...
-		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder v%UpdateVersion%.bat" %UpdateAPIURL%
+		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder v%UpdateVersion%%append%.bat" %UpdateAPIURL%
 		echo.
 		echo Download complete. The program will now clean up and restart.
 		pause
 		del "batch_update.txt"
-		(goto) 2>nul & "batch encoder v%UpdateVersion%.bat" --updated-from "%~f0"
+		(goto) 2>nul & "batch encoder v%UpdateVersion%%append%.bat" --updated-from "%~f0"
 	)
 
 :FFMPEGLocation
