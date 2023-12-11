@@ -43,8 +43,7 @@ if /i "%1"=="--updated-from" (
 	FOR /F "tokens=*" %%g IN ('%regex_command%') do (SET API_link_entry=%%g)
 	set "UpdateAPIURL=%API_link_entry:~1,-2%"
 
-	rem Test if any of them are blank
-	for %%a in (UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
+	for %%a in (ver_entry, API_link_entry, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
 	
 	if exist "batch encoder v%UpdateVersion%.bat" set "append=_new"
 
