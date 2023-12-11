@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.5.0-transient
+SET CurrentVersion=v1.5.0
 
 cls
 if /i "%1"=="--updated-from" (
@@ -10,11 +10,6 @@ if /i "%1"=="--updated-from" (
 	del %2
 )
 
-call:ClearAndTitle
-echo.
-echo Secondary update required^^! This will only take a moment...
-timeout 5
-goto AutoUpdate
 	
 :AskProceed
 	call:ClearAndTitle
