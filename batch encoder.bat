@@ -35,9 +35,7 @@ if /i "%1"=="--updated-from" (
 	>%TEMP%\batch_update.tmp findstr "tag_name" batch_update.json
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
 	set "ver=%ver_entry:~15,-2%"
-	echo ver : %ver%
 	set "UpdateVersion=%ver:~1%"
-	echo ver2 : %UpdateVersion%
 	pause
 	
 	
@@ -133,8 +131,12 @@ set "INPUTFILE="
 				echo.
 				
 				echo Checking output file length...
-				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"') do (SET LEN_INP=%%g)
-				FOR /F "tokens=*" %%g IN ('powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"') do (SET LEN_OUT=%%g)
+				FOR /F "tokens=*" %%g IN (
+					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"'
+					) do (SET LEN_INP=%%g)
+				FOR /F "tokens=*" %%g IN (
+					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"'
+					) do (SET LEN_OUT=%%g)
 				echo Input file: !LEN_INP! - Output file: !LEN_OUT!
 				if /i NOT "!LEN_INP!"=="!LEN_OUT!" goto CritError
 				echo - File lengths match^^!
