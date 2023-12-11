@@ -1,7 +1,7 @@
-@echo on
+@echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.5.0-alpha1
+SET CurrentVersion=v1.5.0-alpha2
 
 cls
 if /i "%1"=="--updated-from" (
@@ -36,24 +36,17 @@ if /i "%1"=="--updated-from" (
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
 	set "ver=%ver_entry:~15,-2%"
 	set "UpdateVersion=%ver:~1%"
+	echo UpdateVersion: %UpdateVersion%
+	
+	set regex_command=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $k.Matches.Value; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
+	
+	FOR /F "tokens=*" %%g IN ('%regex_command%') do (SET API_link_entry=%%g)
+	set "UpdateAPIURL=%API_link_entry:~1,-2%"
+	echo API Link: %UpdateAPIURL%
 	pause
-	
-	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $k.Matches.Value; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
-	rem set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $k.Matches.Value"
-	
-	FOR /F "tokens=*" %%g IN ('%complexcommand%') do (SET API_link_entry=%%g)
-		rem 'powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '""[^"""]+?""",'; $g.Matches.Value"'
-	echo API Link Entry: %API_link_entry%
-	pause
-	
-	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
-		set UpdateVersion=%%A
-		set UpdateAPIURL=%%B
-		set UpdateBrowserURL=%%C
-	)
 
 	rem Test if any of them are blank
-	for %%a in (UpdateVersion, UpdateAPIURL, UpdateBrowserURL) do if not defined %%a goto AutoUpdateError
+	for %%a in (UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
 
 	echo.
 	if /i "%UpdateVersion%"=="%CurrentVersion%" (
@@ -70,12 +63,12 @@ if /i "%1"=="--updated-from" (
 		echo.
 		timeout /nobreak /t 5 > nul
 		echo Downloading files...
-		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
+		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder v%UpdateVersion%.bat" %UpdateAPIURL%
 		echo.
 		echo Download complete. The program will now clean up and restart.
 		pause
 		del "batch_update.txt"
-		(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
+		(goto) 2>nul & "batch encoder v%UpdateVersion%.bat" --updated-from "%~f0"
 	)
 
 :FFMPEGLocation
