@@ -170,6 +170,7 @@ echo **********************************
 	goto EndPause
 	
 :AutoUpdateError
+	del "%updateFileName%"
 	echo.
 	echo There was a problem with the auto-updater. Restarting program...
 	echo.

@@ -67,6 +67,7 @@ setlocal enabledelayedexpansion
 	(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
 	
 :AutoUpdateError
+	del "%updateFileName%"
 	echo.
 	echo There was a problem with the auto-updater. Exiting...
 	echo.
