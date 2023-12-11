@@ -172,7 +172,12 @@ echo **********************************
 :AutoUpdateError
 	del "%updateFileName%"
 	echo.
-	echo There was a problem with the auto-updater. Restarting program...
+	echo.
+	echo *******************************************************
+	echo There was a problem with the auto-updater. You can download the latest version of the program at: 
+	echo https://github.com/Adam-Kay/Batch-Encoder/releases
+	echo.
+	echo Restarting program...
 	echo.
 	pause
 	goto AskProceed
