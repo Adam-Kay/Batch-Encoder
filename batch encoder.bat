@@ -38,7 +38,7 @@ if /i "%1"=="--updated-from" (
 	set "UpdateVersion=%ver:~1%"
 	pause
 	
-	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '""[^"""]+?""",'; $g.Matches.Value"
+	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $k.Matches.Value; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	rem set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $k.Matches.Value"
 	
 	FOR /F "tokens=*" %%g IN ('%complexcommand%') do (SET API_link_entry=%%g)
