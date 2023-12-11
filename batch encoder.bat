@@ -1,4 +1,4 @@
-@echo off
+@echo on
 setlocal enabledelayedexpansion
 
 SET CurrentVersion=v1.5.0-alpha1
@@ -38,10 +38,10 @@ if /i "%1"=="--updated-from" (
 	set "UpdateVersion=%ver:~1%"
 	pause
 	
-	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '""[^"""]+?""",'; $g.Matches.Value"
-	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $k.Matches.Value"
+	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '""[^"""]+?""",'; $g.Matches.Value"
+	rem set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $k.Matches.Value"
 	
-	FOR /F "tokens=*" %%g IN ('powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $k.Matches.Value"') do (SET API_link_entry=%%g)
+	FOR /F "tokens=*" %%g IN ('%complexcommand%') do (SET API_link_entry=%%g)
 		rem 'powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '""[^"""]+?""",'; $g.Matches.Value"'
 	echo API Link Entry: %API_link_entry%
 	pause
