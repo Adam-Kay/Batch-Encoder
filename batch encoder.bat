@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.5.0-alpha2
+SET CurrentVersion=v1.5.0-alpha3
 
 cls
 if /i "%1"=="--updated-from" (
@@ -29,15 +29,16 @@ if /i "%1"=="--updated-from" (
 :AutoUpdate
 	call:ClearAndTitle
 	echo Downloading information...
-	curl --silent -L -H "Accept: application/vnd.github+json" -o batch_update.json https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
+	set "updateFileName=batch_update.json"
+	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
 	
-	>%TEMP%\batch_update.tmp findstr "tag_name" batch_update.json
+	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
 	set "ver=%ver_entry:~15,-2%"
 	set "UpdateVersion=%ver:~1%"
 	
-	set regex_command=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
+	set regex_command=powershell -Command "$x = Get-Content %updateFileName% -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
 	FOR /F "tokens=*" %%g IN ('%regex_command%') do (SET API_link_entry=%%g)
 	set "UpdateAPIURL=%API_link_entry:~1,-2%"
@@ -66,7 +67,7 @@ if /i "%1"=="--updated-from" (
 		echo.
 		echo Download complete. The program will now clean up and restart.
 		pause
-		del "batch_update.txt"
+		del "%updateFileName%"
 		(goto) 2>nul & "batch encoder v%UpdateVersion%%append%.bat" --updated-from "%~f0"
 	)
 
