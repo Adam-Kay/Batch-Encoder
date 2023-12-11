@@ -36,14 +36,11 @@ if /i "%1"=="--updated-from" (
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
 	set "ver=%ver_entry:~15,-2%"
 	set "UpdateVersion=%ver:~1%"
-	echo UpdateVersion: %UpdateVersion%
 	
-	set regex_command=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $k.Matches.Value; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
+	set regex_command=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
 	FOR /F "tokens=*" %%g IN ('%regex_command%') do (SET API_link_entry=%%g)
 	set "UpdateAPIURL=%API_link_entry:~1,-2%"
-	echo API Link: %UpdateAPIURL%
-	pause
 
 	rem Test if any of them are blank
 	for %%a in (UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
