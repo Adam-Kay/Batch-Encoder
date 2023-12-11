@@ -29,7 +29,7 @@ if /i "%1"=="--updated-from" (
 :AutoUpdate
 	call:ClearAndTitle
 	echo Downloading information...
-	curl -L -H "Accept: application/vnd.github+json" -o batch_update.json https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
+	curl --silent -L -H "Accept: application/vnd.github+json" -o batch_update.json https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" batch_update.json
@@ -38,6 +38,13 @@ if /i "%1"=="--updated-from" (
 	set "UpdateVersion=%ver:~1%"
 	pause
 	
+	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '""[^"""]+?""",'; $g.Matches.Value"
+	set complexcommand=powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $k.Matches.Value"
+	
+	FOR /F "tokens=*" %%g IN ('powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $k.Matches.Value"') do (SET API_link_entry=%%g)
+		rem 'powershell -Command "$x = Get-Content _assetlist.json -Raw; $k = $x | Select-String -Pattern '(?s)url(((?!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '""[^"""]+?""",'; $g.Matches.Value"'
+	echo API Link Entry: %API_link_entry%
+	pause
 	
 	for /f "tokens=1,2,3 delims=|" %%A in (batch_update.txt) do (
 		set UpdateVersion=%%A
