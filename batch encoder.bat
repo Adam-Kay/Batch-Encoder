@@ -15,20 +15,20 @@ set "iconyellow=[7;33m"
 set "icongreen=[7;32m"
 set "iconend=[0m"
 
-	
+
 :AskProceed
 	call:ClearAndTitle
 	echo %icongray% i %iconend% This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals.
-	SET /P "CONFIRMATION=Do you want to proceed? [90m[Y/N][0m: "
-	IF /i "%CONFIRMATION%"=="n" exit
-	IF /i "%CONFIRMATION%"=="y" (goto AskUpdate)
+	SET /P "startconfirmation=Do you want to proceed? [90m[Y/N][0m: "
+	IF /i "%startconfirmation%"=="n" exit
+	IF /i "%startconfirmation%"=="y" (goto AskUpdate)
 	goto AskProceed
 
 :AskUpdate
 	call:ClearAndTitle
-	SET /P "CONFIRMATION=%icongray% ^ %iconend% Would you like to check for an update? [90m[Y/N][0m: "
-	IF /i "%CONFIRMATION%"=="n" (goto FFMPEGLocation)
-	IF /i "%CONFIRMATION%"=="y" (goto AutoUpdate)
+	SET /P "updateconfirmation=%icongray% ^ %iconend% Would you like to check for an update? [90m[Y/N][0m: "
+	IF /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
+	IF /i "%updateconfirmation%"=="y" (goto AutoUpdate)
 	goto AskUpdate
 	
 :AutoUpdate
