@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.5.0
+SET CurrentVersion=v1.5.1
 
 cls
 if /i "%1"=="--updated-from" (
@@ -10,10 +10,14 @@ if /i "%1"=="--updated-from" (
 	del %2
 )
 
+set "icongray=[7;90m"
+set "iconyellow=[7;33m"
+set "iconend=[0m"
+
 	
 :AskProceed
 	call:ClearAndTitle
-	echo This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals. 
+	echo %icongray% i %iconend% This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals.
 	SET /P "CONFIRMATION=Do you want to proceed? [90m[Y/N][0m: "
 	IF /i "%CONFIRMATION%"=="n" exit
 	IF /i "%CONFIRMATION%"=="y" (goto AskUpdate)
@@ -21,14 +25,14 @@ if /i "%1"=="--updated-from" (
 
 :AskUpdate
 	call:ClearAndTitle
-	SET /P "CONFIRMATION=Would you like to check for an update? [90m[Y/N][0m: "
+	SET /P "CONFIRMATION=%icongray% ^ %iconend% Would you like to check for an update? [90m[Y/N][0m: "
 	IF /i "%CONFIRMATION%"=="n" (goto FFMPEGLocation)
 	IF /i "%CONFIRMATION%"=="y" (goto AutoUpdate)
 	goto AskUpdate
 	
 :AutoUpdate
 	call:ClearAndTitle
-	echo Downloading information...
+	echo %icongray% i %iconend% Downloading information...
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
@@ -49,23 +53,23 @@ if /i "%1"=="--updated-from" (
 
 	echo.
 	if /i "%UpdateVersion%"=="%CurrentVersion%" (
-		echo Current version is up-to-date.
+		echo %icongray% - %iconend% Current version is up-to-date.
 		echo.
 		echo Restarting program...
 		echo.
-		pause
+		call:GrayPause
 		del "%updateFileName%"
 		goto AskProceed
 	) else (
-		echo Differing version found^^! ^(%CurrentVersion% -^> %UpdateVersion%^)
+		echo %iconyellow% ^^! %iconend% Differing version found^^! ^([31m%CurrentVersion%[0m -^> [32m%UpdateVersion%[0m^)
 		echo Proceeding with update in 5 seconds, press CTRL+C or close window to cancel.
 		echo.
 		timeout /nobreak /t 5 > nul
 		echo Downloading files...
 		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%.bat" %UpdateAPIURL%
 		echo.
-		echo Download complete. The program will now clean up and restart.
-		pause
+		echo Download complete. The program will now clean up and restart. 
+		call:GrayPause
 		del "%updateFileName%"
 		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
 	)
@@ -73,7 +77,7 @@ if /i "%1"=="--updated-from" (
 :FFMPEGLocation
 	call:ClearAndTitle
 	rem TODO: detect FFMPEG if in same folder
-	SET /P "LOCATION=Where is FFMPEG.exe located? (paste full path): "
+	SET /P "LOCATION=%icongray% ? %iconend% Where is FFMPEG.exe located? (paste full path): "
 	
 set /a "COUNTER=-1" 
 
@@ -130,7 +134,7 @@ set "INPUTFILE="
 				echo - Output file exists^^!
 				echo.
 				
-				echo Checking output file length...
+				echo %icongray% Checking output file length...
 				FOR /F "tokens=*" %%g IN (
 					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"'
 					) do (SET LEN_INP=%%g)
@@ -181,6 +185,12 @@ echo **********************************
 	echo.
 	pause
 	goto AskProceed
+	
+:GrayPause
+	echo [90m
+	pause
+	echo [0m
+	goto:eof
 
 :ClearAndTitle
 	cls
