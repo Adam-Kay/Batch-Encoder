@@ -28,7 +28,7 @@ set "iconend=[0m"
 			echo Trying next file...
 			echo.
 		) else (
-			echo Unknown response '!FileConf!'. Restarting.
+			echo Unknown response '!FileConf!'. The program will now restart.
 			call:GrayPause
 			goto AskFile
 		)

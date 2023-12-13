@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.5.1
+SET CurrentVersion=v1.5.2
 
 cls
 if /i "%1"=="--updated-from" (
@@ -56,7 +56,7 @@ set "iconend=[0m"
 	if /i "%UpdateVersion%"=="%CurrentVersion%" (
 		echo %icongray% - %iconend% Current version is up-to-date.
 		echo.
-		echo Restarting program...
+		echo The program will now restart.
 		call:GrayPause
 		del "%updateFileName%"
 		goto AskProceed
