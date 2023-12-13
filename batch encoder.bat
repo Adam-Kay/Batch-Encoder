@@ -12,6 +12,7 @@ if /i "%1"=="--updated-from" (
 
 set "icongray=[7;90m"
 set "iconyellow=[7;33m"
+set "icongreen=[7;32m"
 set "iconend=[0m"
 
 	
@@ -56,7 +57,6 @@ set "iconend=[0m"
 		echo %icongray% - %iconend% Current version is up-to-date.
 		echo.
 		echo Restarting program...
-		echo.
 		call:GrayPause
 		del "%updateFileName%"
 		goto AskProceed
@@ -91,7 +91,7 @@ set "INPUTFILE="
 :Conversion
 	for %%f in (.\*) do (
 	
-		cls
+		call:ClearAndTitle
 		
 		set "INPUTFILE=%%f"
 		set "INPUTFILE=!INPUTFILE:~2!
@@ -99,7 +99,7 @@ set "INPUTFILE="
 	
 		if /i "!INPUTFILE!"=="%~n0%~x0" (
 			echo Skipping self.
-			timeout 2
+			call:GrayTimeout 2
 		) else (
 			set /a "COUNTER+=1" 
 			echo Encoding !COUNTER! of %TOTAL%
@@ -108,7 +108,7 @@ set "INPUTFILE="
 			set "TESTSTRING=!INPUTFILE:~-4!"
 			if /i NOT "!TESTSTRING!"==".mp4" (
 				echo Skipping unsupported file^: ^(!INPUTFILE!^)
-				timeout 3
+				call:GrayTimeout 3
 			) else ( 
 				set "TESTSTRING=!INPUTFILE:~-8!"
 				if /i "!TESTSTRING!"==".DVR.mp4" (
@@ -119,7 +119,7 @@ set "INPUTFILE="
 				
 				echo Supported file found^: ^(!INPUTFILE!^)
 				
-				timeout /t 5
+				call:GrayTimeout 5
 			
 				%LOCATION% -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
 				
@@ -129,12 +129,12 @@ set "INPUTFILE="
 				echo ***********************
 				echo.
 				
-				echo Checking for output file...
+				echo %icongray% ^| %iconend% Checking for output file...
 				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
 				echo - Output file exists^^!
 				echo.
 				
-				echo %icongray% Checking output file length...
+				echo %icongray% ^| %iconend% Checking output file length...
 				FOR /F "tokens=*" %%g IN (
 					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"'
 					) do (SET LEN_INP=%%g)
@@ -145,7 +145,7 @@ set "INPUTFILE="
 				if /i NOT "!LEN_INP!"=="!LEN_OUT!" goto CritError
 				echo - File lengths match^^!
 				echo.
-				echo Safely proceeding with input file recycling...
+				echo %icongreen% ^| %iconend% Safely proceeding with input file recycling...
 				timeout /nobreak /t 1 > nul
 				
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
@@ -163,7 +163,7 @@ echo Completed encoding %TOTAL% files.
 echo **********************************
 	
 :EndPause
-	pause
+	call:GrayPause
 	exit
 	
 :CritError
@@ -183,12 +183,22 @@ echo **********************************
 	echo.
 	echo Restarting program...
 	echo.
-	pause
+	call:GrayPause
 	goto AskProceed
 	
 :GrayPause
 	echo [90m
 	pause
+	echo [0m
+	goto:eof
+	
+:GrayTimeout
+	echo [90m
+	for %%a in (~1) do if not defined %%a (
+		timeout /t 5
+	) else (
+		timeout /t %~1
+	)
 	echo [0m
 	goto:eof
 
