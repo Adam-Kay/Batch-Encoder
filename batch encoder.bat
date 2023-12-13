@@ -102,8 +102,8 @@ set "INPUTFILE="
 			call:GrayTimeout 2
 		) else (
 			set /a "COUNTER+=1" 
-			echo Encoding !COUNTER! of %TOTAL%
-			echo **********************************
+			echo [100m Encoding !COUNTER! of %TOTAL% [0m
+			rem echo **********************************
 				
 			set "TESTSTRING=!INPUTFILE:~-4!"
 			if /i NOT "!TESTSTRING!"==".mp4" (
@@ -158,31 +158,30 @@ set "INPUTFILE="
 		)
 	)
 	
-cls
-echo Completed encoding %TOTAL% files.
-echo **********************************
-	
+call:ClearAndTitle
+echo [42;97m Completed encoding %TOTAL% files. [0m
+
 :EndPause
 	call:GrayPause
 	exit
 	
 :CritError
+	timeout /t 1
 	echo.
+	call:ErrorLine
 	echo.
-	echo *******************************************************
 	echo A critical error occurred. The latest file has not been modified.
 	goto EndPause
 	
 :AutoUpdateError
 	del "%updateFileName%"
 	echo.
+	call:ErrorLine
 	echo.
-	echo *******************************************************
 	echo There was a problem with the auto-updater. You can download the latest version of the program at: 
 	echo https://github.com/Adam-Kay/Batch-Encoder/releases
 	echo.
-	echo Restarting program...
-	echo.
+	echo The program will now restart.
 	call:GrayPause
 	goto AskProceed
 	
@@ -193,13 +192,20 @@ echo **********************************
 	goto:eof
 	
 :GrayTimeout
-	echo [90m
-	for %%a in (~1) do if not defined %%a (
+	set timer=%~1
+	<nul set /p=[90m
+	for %%a in (timer) do if not defined %%a (
 		timeout /t 5
 	) else (
-		timeout /t %~1
+		timeout /t %timer%
 	)
 	echo [0m
+	goto:eof
+	
+:ErrorLine
+	rem echo [4;31m                                                            [0m
+	echo [31m************************************************************[0m
+	rem echo [7;31m ********************************************************** [0m
 	goto:eof
 
 :ClearAndTitle
