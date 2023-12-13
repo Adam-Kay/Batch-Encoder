@@ -1,9 +1,15 @@
 @echo off
 setlocal enabledelayedexpansion
 
+set "icongray=[7;90m"
+set "iconyellow=[7;33m"
+set "icongreen=[7;32m"
+set "iconend=[0m"
+
+
 :AskProceed
 	cls
-	SET /p "ProceedConf=This program will attempt to forcibly update the batch encoder script. Do you want to proceed? [Y/N] : "
+	SET /p "ProceedConf=%icongray% i %iconend% This program will attempt to forcibly update the batch encoder script. Do you want to proceed? [90m[Y/N][0m: "
 	IF /i "%ProceedConf%"=="n" exit
 	IF /i "%ProceedConf%"=="y" (goto AskFile)
 	goto AskProceed
@@ -13,7 +19,7 @@ setlocal enabledelayedexpansion
 	cls
 	set CONFIRMATION=
 	for %%f in (*batch*encode*.bat) do (
-		SET /p "FileConf=Is this the current batch encoder script file?: '%%f' [Y/N] : "
+		SET /p "FileConf=%icongray% ? %iconend% Is this the current batch encoder script file?: '%%f' [90m[Y/N][0m: "
 		IF /i "!FileConf!"=="y" (
 			set BEFile=%%f
 			goto Update
@@ -23,13 +29,13 @@ setlocal enabledelayedexpansion
 			echo.
 		) else (
 			echo Unknown response '!FileConf!'. Restarting.
-			pause
+			call:GrayPause
 			goto AskFile
 		)
 	)
 	
 :AskAnyway
-	SET /p "AnywayConf=Unable to find batch encoder script. Would you like to download the latest file anyway? [Y/N] : "
+	SET /p "AnywayConf=%iconyellow% X %iconend% Unable to find batch encoder script. Would you like to download the latest file anyway? [90m[Y/N][0m: "
 	IF /i "%AnywayConf%"=="n" exit
 	IF /i "%AnywayConf%"=="y" (goto Update)
 	goto AskAnyway
@@ -37,7 +43,7 @@ setlocal enabledelayedexpansion
 
 :Update
 	cls
-	echo Downloading information...
+	echo %icongray% i %iconend% Downloading information...
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
@@ -54,15 +60,16 @@ setlocal enabledelayedexpansion
 
 	for %%a in (ver_entry, API_link_entry, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
 	
-	echo Version found^^! ^(%UpdateVersion%^)
+	echo.
+	echo %iconyellow% ^^! %iconend% Version found^^! ^([32m%UpdateVersion%^[0m)
 	echo Proceeding with force update in 5 seconds, press CTRL+C or close window to cancel.
 	echo.
 	timeout /nobreak /t 5 > nul
 	echo Downloading files...
 	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
 	echo.
-	echo Download complete. The program will now clean up and restart.
-	pause
+	echo %icongreen% i %iconend% Download complete. The program will now clean up and restart.
+	call:GrayPause
 	if defined BEFile (
 		if not "%BEFile%"=="batch encoder %UpdateVersion%.bat" (
 			del "%BEFile%"
@@ -75,11 +82,17 @@ setlocal enabledelayedexpansion
 	del "%updateFileName%"
 	echo.
 	echo.
-	echo *******************************************************
+	echo [31m************************************************************[0m
+	echo.
 	echo There was a problem with the auto-updater. You can download the latest version of the program at: 
 	echo https://github.com/Adam-Kay/Batch-Encoder/releases
 	echo.
-	echo Exiting...
-	echo.
-	pause
+	echo The program will now exit.
+	call:GrayPause
 	exit
+	
+:GrayPause
+	echo [90m
+	pause
+	echo [0m
+	goto:eof

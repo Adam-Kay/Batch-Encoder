@@ -68,7 +68,7 @@ set "iconend=[0m"
 		echo Downloading files...
 		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%.bat" %UpdateAPIURL%
 		echo.
-		echo Download complete. The program will now clean up and restart. 
+		echo %icongreen% i %iconend% Download complete. The program will now clean up and restart. 
 		call:GrayPause
 		del "%updateFileName%"
 		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
