@@ -10,8 +10,5 @@ assignees: Adam-Kay
 ### Improvement Description
 A short description of the improvement to be made.
 
-### Functionality / Design
-What functionality / design the new feature should have.
-
 ### How to implement
-How could the improvement be implemented?
+How could the improvement be implemented? What design does the improvement have?
