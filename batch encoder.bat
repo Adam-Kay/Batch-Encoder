@@ -14,14 +14,14 @@ if /i "%1"=="--updated-from" (
 :AskProceed
 	call:ClearAndTitle
 	echo This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals. 
-	SET /P "CONFIRMATION=Do you want to proceed? [Y/N] : "
+	SET /P "CONFIRMATION=Do you want to proceed? [90m[Y/N][0m: "
 	IF /i "%CONFIRMATION%"=="n" exit
 	IF /i "%CONFIRMATION%"=="y" (goto AskUpdate)
 	goto AskProceed
 
 :AskUpdate
 	call:ClearAndTitle
-	SET /P "CONFIRMATION=Would you like to check for an update? [Y/N] : "
+	SET /P "CONFIRMATION=Would you like to check for an update? [90m[Y/N][0m: "
 	IF /i "%CONFIRMATION%"=="n" (goto FFMPEGLocation)
 	IF /i "%CONFIRMATION%"=="y" (goto AutoUpdate)
 	goto AskUpdate
@@ -71,8 +71,9 @@ if /i "%1"=="--updated-from" (
 	)
 
 :FFMPEGLocation
+	call:ClearAndTitle
 	rem TODO: detect FFMPEG if in same folder
-	SET /P "LOCATION=Where is FFMPEG.exe located? [paste full path]: "
+	SET /P "LOCATION=Where is FFMPEG.exe located? (paste full path): "
 	
 set /a "COUNTER=-1" 
 
@@ -183,5 +184,6 @@ echo **********************************
 
 :ClearAndTitle
 	cls
-	echo Batch Encoder %CurrentVersion%
+	echo [7m Batch Encoder %CurrentVersion% [0m
+	echo.
 	goto:eof
