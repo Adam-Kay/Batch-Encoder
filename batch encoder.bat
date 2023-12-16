@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-SET CurrentVersion=v1.5.2
+set CurrentVersion=v1.5.2
 
 cls
 if /i "%1"=="--updated-from" (
@@ -19,16 +19,16 @@ set "iconend=[0m"
 :AskProceed
 	call:ClearAndTitle
 	echo %icongray% i %iconend% This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals.
-	SET /P "startconfirmation=Do you want to proceed? [90m[Y/N][0m: "
-	IF /i "%startconfirmation%"=="n" exit
-	IF /i "%startconfirmation%"=="y" (goto AskUpdate)
+	set /p "startconfirmation=Do you want to proceed? [90m[Y/N][0m: "
+	if /i "%startconfirmation%"=="n" exit
+	if /i "%startconfirmation%"=="y" (goto AskUpdate)
 	goto AskProceed
 
 :AskUpdate
 	call:ClearAndTitle
-	SET /P "updateconfirmation=%icongray% ^ %iconend% Would you like to check for an update? [90m[Y/N][0m: "
-	IF /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
-	IF /i "%updateconfirmation%"=="y" (goto AutoUpdate)
+	set /p "updateconfirmation=%icongray% ^ %iconend% Would you like to check for an update? [90m[Y/N][0m: "
+	if /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
+	if /i "%updateconfirmation%"=="y" (goto AutoUpdate)
 	goto AskUpdate
 	
 :AutoUpdate
@@ -45,7 +45,7 @@ set "iconend=[0m"
 	
 	set regex_command=powershell -Command "$x = Get-Content %updateFileName% -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
-	FOR /F "tokens=*" %%g IN ('%regex_command%') do (SET API_link_entry=%%g)
+	for /F "tokens=*" %%g in ('%regex_command%') do (set API_link_entry=%%g)
 	set "UpdateAPIURL=%API_link_entry:~1,-2%"
 
 	for %%a in (ver_entry, API_link_entry, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
@@ -77,7 +77,7 @@ set "iconend=[0m"
 :FFMPEGLocation
 	call:ClearAndTitle
 	rem TODO: detect FFMPEG if in same folder
-	SET /P "LOCATION=%icongray% ? %iconend% Where is FFMPEG.exe located? (paste full path): "
+	set /p "LOCATION=%icongray% ? %iconend% Where is FFMPEG.exe located? (paste full path): "
 	
 set /a "COUNTER=-1" 
 
@@ -106,7 +106,7 @@ set "INPUTFILE="
 			rem echo **********************************
 				
 			set "TESTSTRING=!INPUTFILE:~-4!"
-			if /i NOT "!TESTSTRING!"==".mp4" (
+			if /i not "!TESTSTRING!"==".mp4" (
 				echo Skipping unsupported file^: ^(!INPUTFILE!^)
 				call:GrayTimeout 3
 			) else ( 
@@ -130,19 +130,19 @@ set "INPUTFILE="
 				echo.
 				
 				echo %icongray% ^| %iconend% Checking for output file...
-				if /i NOT exist "%CD%\!OUTPUTFILE!" goto CritError
+				if /i not exist "%CD%\!OUTPUTFILE!" goto CritError
 				echo - Output file exists^^!
 				echo.
 				
 				echo %icongray% ^| %iconend% Checking output file length...
-				FOR /F "tokens=*" %%g IN (
+				for /F "tokens=*" %%g in (
 					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"'
-					) do (SET LEN_INP=%%g)
-				FOR /F "tokens=*" %%g IN (
+					) do (set LEN_inP=%%g)
+				for /F "tokens=*" %%g in (
 					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"'
-					) do (SET LEN_OUT=%%g)
-				echo Input file: !LEN_INP! - Output file: !LEN_OUT!
-				if /i NOT "!LEN_INP!"=="!LEN_OUT!" goto CritError
+					) do (set LEN_OUT=%%g)
+				echo Input file: !LEN_inP! - Output file: !LEN_OUT!
+				if /i not "!LEN_inP!"=="!LEN_OUT!" goto CritError
 				echo - File lengths match^^!
 				echo.
 				echo %icongreen% ^| %iconend% Safely proceeding with input file recycling...
