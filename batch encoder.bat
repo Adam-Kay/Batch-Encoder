@@ -4,6 +4,14 @@ setlocal enabledelayedexpansion
 set CurrentVersion=v1.5.2
 cls
 
+set "icongray=[7;90m"
+set "iconyellow=[7;33m"
+set "icongreen=[7;32m"
+set "textgray=[90m"
+set "textgreen=[32m"
+set "textred=[31m"
+set "formatend=[0m"
+
 :ArgParser
 	set "FLAG=0"
 	for %%G in (%*) DO (
@@ -37,13 +45,6 @@ if defined par_updated-from (
 	del "%par_updated-from:"=%"
 )
 
-set "icongray=[7;90m"
-set "iconyellow=[7;33m"
-set "icongreen=[7;32m"
-set "textgray=[90m"
-set "textgreen=[32m"
-set "textred=[31m"
-set "formatend=[0m"
 
 :AskProceed
 	call:ClearAndTitle
