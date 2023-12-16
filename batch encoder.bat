@@ -17,7 +17,7 @@ set "formatend=[0m"
 	for %%G in (%*) DO (
 		set ARG=%%G
 		rem if FLAG, record the flag name
-		echo !ARG! | findstr "\--" >nul && (
+		echo !ARG! | findstr "\--" > nul && (
 			if not ["!FLAG!"]==["0"] ( rem Check if FLAG is set - if it is, then previous was a boolean.
 				echo set !FLAG!=true
 				set "!FLAG!=true"
@@ -26,21 +26,18 @@ set "formatend=[0m"
 			set "FLAG=!ARG_NAME!"
 		) || (
 			set "par_!FLAG!=!ARG!"
-			echo set par_!FLAG!=!ARG!
 			set "FLAG=0"
 		)
 	)
 
 	if not ["!FLAG!"]==["0"] ( rem Final boolean catch
-		echo set par_!FLAG!=true
 		set "par_!FLAG!=true"
 	)
 
 
 if defined par_updated-from (
-	echo Just updated^^! Running cleanup...
-	timeout 2
-	pause
+	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
+	timeout /nobreak 2 > nul
 	rem ↓ special format to remove " from string
 	del "%par_updated-from:"=%"
 )
