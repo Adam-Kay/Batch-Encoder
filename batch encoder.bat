@@ -65,7 +65,6 @@ set "formatend=[0m"
 	echo %icongray% i %formatend% Downloading information...
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
-	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
