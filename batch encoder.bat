@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.6.0
+set CurrentVersion=v1.6.1
 cls
 
 set "icongray=[7;90m"
@@ -37,6 +37,8 @@ set "formatend=[0m"
 		echo %iconyellow%par_!FLAG!=TRUE%formatend%
 	)
 
+rem pause
+cls
 
 if defined par_updated-from (
 	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
@@ -45,7 +47,6 @@ if defined par_updated-from (
 	del "%par_updated-from:"=%"
 )
 
-rem pause
 
 :AskProceed
 	call:ClearAndTitle
