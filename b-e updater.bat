@@ -62,7 +62,7 @@ set "iconend=[0m"
 	
 	echo.
 	echo %iconyellow% ^^! %iconend% Version found^^! ^([32m%UpdateVersion%^[0m)
-	echo Proceeding with force update in 5 seconds, press CTRL+C or close window to cancel.
+	echo Proceeding with force update in 5 seconds; close window to cancel.
 	echo.
 	timeout /nobreak /t 5 > nul
 	echo Downloading files...
