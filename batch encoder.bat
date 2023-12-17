@@ -217,6 +217,7 @@ echo [42;97m Completed encoding %TOTAL% files. %formatend%
 	call:ErrorLine
 	echo.
 	echo A critical error occurred. The latest file has not been modified.
+	if /i "%par_silent%"=="true" (exit /b 3)
 	goto EndPause
 	
 :AutoUpdateError
@@ -227,6 +228,7 @@ echo [42;97m Completed encoding %TOTAL% files. %formatend%
 	echo There was a problem with the auto-updater. You can download the latest version of the program at: 
 	echo https://github.com/Adam-Kay/Batch-Encoder/releases
 	echo.
+	if /i "%par_silent%"=="true" (exit /b 2)
 	echo The program will now restart.
 	call:GrayPause
 	goto AskProceed
