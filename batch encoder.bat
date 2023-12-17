@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.6.2
+set CurrentVersion=v1.6.0
 cls
 
 set "icongray=[7;90m"
@@ -45,7 +45,7 @@ if defined par_updated-from (
 	del "%par_updated-from:"=%"
 )
 
-pause rem remove
+rem pause
 
 :AskProceed
 	call:ClearAndTitle
@@ -110,7 +110,7 @@ pause rem remove
 		echo Downloading files...
 		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%.bat" %UpdateAPIURL%
 		echo.
-		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart. 
+		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
 		call:GrayPause
 		del "%updateFileName%"
 		if /i "%par_silent%"=="true" (
@@ -218,7 +218,7 @@ echo [42;97m Completed encoding %TOTAL% files. %formatend%
 
 :EndPause
 	call:GrayPause
-	exit
+	exit /b 0
 	
 :CritError
 	timeout /t 1
