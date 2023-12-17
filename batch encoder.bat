@@ -19,7 +19,6 @@ set "formatend=[0m"
 		rem if FLAG, record the flag name
 		echo !ARG! | findstr "\--" > nul && (
 			if not ["!FLAG!"]==["0"] ( rem Check if FLAG is set - if it is, then previous was a boolean.
-				echo set !FLAG!=true
 				set "!FLAG!=true"
 			)
 			set ARG_NAME=!ARG:~2!
@@ -42,9 +41,13 @@ if defined par_updated-from (
 	del "%par_updated-from:"=%"
 )
 
+echo %par_silent%
+pause
+
 
 :AskProceed
 	call:ClearAndTitle
+	if %par_silent%==true (goto AskUpdate)
 	echo %icongray% i %formatend% This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals.
 	set /p "startconfirmation=Do you want to proceed? %textgray%[Y/N]%formatend%: "
 	if /i "%startconfirmation%"=="n" exit
@@ -53,6 +56,9 @@ if defined par_updated-from (
 
 :AskUpdate
 	call:ClearAndTitle
+	if %par_silent%==true (
+		if not defined par_update (echo Error: --silent switch used but --update [true/false] not provided. & exit /b 1)
+	)
 	set /p "updateconfirmation=%icongray% ^ %formatend% Would you like to check for an update? %textgray%[Y/N]%formatend%: "
 	if /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
 	if /i "%updateconfirmation%"=="y" (goto AutoUpdate)
