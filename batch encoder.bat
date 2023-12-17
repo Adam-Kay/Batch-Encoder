@@ -1,14 +1,8 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.5.2
-
+set CurrentVersion=v1.6.0
 cls
-if /i "%1"=="--updated-from" (
-	echo Just updated^^! Running cleanup...
-	timeout 1
-	del %2
-)
 
 set "icongray=[7;90m"
 set "iconyellow=[7;33m"
@@ -18,8 +12,44 @@ set "textgreen=[32m"
 set "textred=[31m"
 set "formatend=[0m"
 
+:ArgParser
+	set "FLAG=0"
+	for %%G in (%*) DO (
+		set ARG=%%G
+		rem if FLAG, record the flag name
+		echo !ARG! | findstr "\--" > nul && (
+			if not ["!FLAG!"]==["0"] ( rem Check if FLAG is set - if it is, then previous was a boolean.
+				set "par_!FLAG!=true"
+				echo %iconyellow%par_!FLAG!=TRUE%formatend%
+			)
+			set ARG_NAME=!ARG:~2!
+			set "FLAG=!ARG_NAME!"
+			echo %iconyellow%FLAG=!ARG_NAME!%formatend%
+		) || (
+			set "par_!FLAG!=!ARG!"
+			echo %iconyellow%par_!FLAG!=!ARG!%formatend%
+			set "FLAG=0"
+		)
+	)
+
+	if not ["!FLAG!"]==["0"] ( rem Final boolean catch
+		set "par_!FLAG!=true"
+		echo %iconyellow%par_!FLAG!=TRUE%formatend%
+	)
+
+
+if defined par_updated-from (
+	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
+	timeout /nobreak 2 > nul
+	rem ↓ special format to remove " from string
+	del "%par_updated-from:"=%"
+)
+
+rem pause
+
 :AskProceed
 	call:ClearAndTitle
+	if "%par_silent%"=="true" (goto AskUpdate)
 	echo %icongray% i %formatend% This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals.
 	set /p "startconfirmation=Do you want to proceed? %textgray%[Y/N]%formatend%: "
 	if /i "%startconfirmation%"=="n" exit
@@ -28,6 +58,13 @@ set "formatend=[0m"
 
 :AskUpdate
 	call:ClearAndTitle
+	if /i "%par_silent%"=="true" (
+		if not defined par_update (echo Error: --silent switch used but --update [true/false] not provided. & exit /b 1)
+		set "par_update=%par_update:"=%"
+		if /i "%par_update%"=="false" (goto FFMPEGLocation)
+		if /i "%par_update%"=="true" (goto AutoUpdate)
+		echo Error: --update argument invalid ^(should be [true/false]^). & exit /b 1
+	)
 	set /p "updateconfirmation=%icongray% ^ %formatend% Would you like to check for an update? %textgray%[Y/N]%formatend%: "
 	if /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
 	if /i "%updateconfirmation%"=="y" (goto AutoUpdate)
@@ -38,7 +75,6 @@ set "formatend=[0m"
 	echo %icongray% i %formatend% Downloading information...
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
-	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
@@ -61,7 +97,11 @@ set "formatend=[0m"
 		echo The program will now restart.
 		call:GrayPause
 		del "%updateFileName%"
-		goto AskProceed
+		if /i "%par_silent%"=="true" (
+			(goto) 2>nul & "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+		) else (
+			(goto) 2>nul & "%~f0"
+		)
 	) else (
 		echo %iconyellow% ^^! %formatend% Differing version found^^! ^(%textred%%CurrentVersion%%formatend% -^> %textgreen%%UpdateVersion%%formatend%^)
 		echo Proceeding with update in 5 seconds; close window to cancel.
@@ -70,25 +110,38 @@ set "formatend=[0m"
 		echo Downloading files...
 		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%.bat" %UpdateAPIURL%
 		echo.
-		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart. 
+		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
 		call:GrayPause
 		del "%updateFileName%"
-		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
+		if /i "%par_silent%"=="true" (
+			(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+		) else (
+			(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
+		)
 	)
 
 :FFMPEGLocation
 	call:ClearAndTitle
-	rem TODO: detect FFMPEG if in same folder
+	if /i "%par_silent%"=="true" (
+		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc [path] not provided. & exit /b 1)
+		set "par_ffmpegloc=%par_ffmpegloc:"=%"
+		if not exist "%par_ffmpegloc%" (
+			echo Error: --ffmpegloc path "%par_ffmpegloc%" provided does not exist.
+			exit /b 1
+		) else (
+			set "LOCATION=%par_ffmpegloc%"
+			goto Count
+		)
+	)
 	set /p "LOCATION=%icongray% ? %formatend% Where is FFMPEG.exe located? (paste full path): "
-	
-set /a "COUNTER=-1" 
 
 :Count
+	set /a "COUNTER=-1"
 	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
 	
-set /a "COUNTER=0"
-set "INPUTFILE="
+	set /a "COUNTER=0"
+	set "INPUTFILE="
 
 :Conversion
 	for %%f in (.\*) do (
@@ -173,6 +226,7 @@ echo [42;97m Completed encoding %TOTAL% files. %formatend%
 	call:ErrorLine
 	echo.
 	echo A critical error occurred. The latest file has not been modified.
+	if /i "%par_silent%"=="true" (exit /b 3)
 	goto EndPause
 	
 :AutoUpdateError
@@ -183,13 +237,14 @@ echo [42;97m Completed encoding %TOTAL% files. %formatend%
 	echo There was a problem with the auto-updater. You can download the latest version of the program at: 
 	echo https://github.com/Adam-Kay/Batch-Encoder/releases
 	echo.
+	if /i "%par_silent%"=="true" (exit /b 2)
 	echo The program will now restart.
 	call:GrayPause
-	goto AskProceed
+	(goto) 2>nul & "%~f0"
 	
 :GrayPause
 	echo %textgray%
-	pause
+	if /i not "%par_silent%"=="true" (pause)
 	echo %formatend%
 	goto:eof
 	
