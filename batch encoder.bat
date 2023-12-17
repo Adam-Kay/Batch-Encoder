@@ -165,7 +165,7 @@ echo [42;97m Completed encoding %TOTAL% files. %formatend%
 
 :EndPause
 	call:GrayPause
-	exit
+	exit /b 0
 	
 :CritError
 	timeout /t 1
