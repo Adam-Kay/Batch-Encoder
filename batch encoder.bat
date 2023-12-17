@@ -97,7 +97,11 @@ pause rem remove
 		echo The program will now restart.
 		call:GrayPause
 		del "%updateFileName%"
-		goto AskProceed
+		if /i "%par_silent%"=="true" (
+			(goto) 2>nul & "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+		) else (
+			(goto) 2>nul & "%~f0"
+		)
 	) else (
 		echo %iconyellow% ^^! %formatend% Differing version found^^! ^(%textred%%CurrentVersion%%formatend% -^> %textgreen%%UpdateVersion%%formatend%^)
 		echo Proceeding with update in 5 seconds, press CTRL+C or close window to cancel.
@@ -109,7 +113,11 @@ pause rem remove
 		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart. 
 		call:GrayPause
 		del "%updateFileName%"
-		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
+		if /i "%par_silent%"=="true" (
+			(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+		) else (
+			(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
+		)
 	)
 
 :FFMPEGLocation
@@ -118,7 +126,8 @@ pause rem remove
 		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc [path] not provided. & exit /b 1)
 		set "par_ffmpegloc=%par_ffmpegloc:"=%"
 		if not exist "%par_ffmpegloc%" (
-			echo "Error: --ffmpegloc path provided does not exist." & exit /b 1
+			echo Error: --ffmpegloc path "%par_ffmpegloc%" provided does not exist.
+			exit /b 1
 		) else (
 			set "LOCATION=%par_ffmpegloc%"
 			goto Count
@@ -231,11 +240,11 @@ echo [42;97m Completed encoding %TOTAL% files. %formatend%
 	if /i "%par_silent%"=="true" (exit /b 2)
 	echo The program will now restart.
 	call:GrayPause
-	goto AskProceed
+	(goto) 2>nul & "%~f0"
 	
 :GrayPause
 	echo %textgray%
-	pause
+	if /i not "%par_silent%"=="true" (pause)
 	echo %formatend%
 	goto:eof
 	
