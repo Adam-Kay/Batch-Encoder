@@ -64,7 +64,7 @@ set "formatend=[0m"
 		goto AskProceed
 	) else (
 		echo %iconyellow% ^^! %formatend% Differing version found^^! ^(%textred%%CurrentVersion%%formatend% -^> %textgreen%%UpdateVersion%%formatend%^)
-		echo Proceeding with update in 5 seconds, press CTRL+C or close window to cancel.
+		echo Proceeding with update in 5 seconds; close window to cancel.
 		echo.
 		timeout /nobreak /t 5 > nul
 		echo Downloading files...
