@@ -60,8 +60,8 @@ pause rem remove
 	call:ClearAndTitle
 	if /i %par_silent%==true (
 		if not defined par_update (echo Error: --silent switch used but --update [true/false] not provided. & exit /b 1)
-		if /i %par_update%==false (goto FFMPEGLocation)
-		if /i %par_update%==true (goto AutoUpdate)
+		if /i "%par_update:"=%"=="false" (goto FFMPEGLocation)
+		if /i "%par_update:"=%"=="true" (goto AutoUpdate)
 		echo Error: --update argument invalid ^(should be [true/false]^). & exit /b 1
 	)
 	set /p "updateconfirmation=%icongray% ^ %formatend% Would you like to check for an update? %textgray%[Y/N]%formatend%: "
@@ -113,17 +113,24 @@ pause rem remove
 
 :FFMPEGLocation
 	call:ClearAndTitle
-	rem TODO: detect FFMPEG if in same folder
+	if /i %par_silent%==true (
+		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc [path] not provided. & exit /b 1)
+		if not exist "%par_ffmpegloc:"=%" (
+			echo "Error: --ffmpegloc path provided does not exist." & exit /b 1
+		) else (
+			set "LOCATION=%par_ffmpegloc:"=%"
+			goto Count
+		)
+	)
 	set /p "LOCATION=%icongray% ? %formatend% Where is FFMPEG.exe located? (paste full path): "
-	
-set /a "COUNTER=-1" 
 
 :Count
+	set /a "COUNTER=-1"
 	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
 	
-set /a "COUNTER=0"
-set "INPUTFILE="
+	set /a "COUNTER=0"
+	set "INPUTFILE="
 
 :Conversion
 	for %%f in (.\*) do (
