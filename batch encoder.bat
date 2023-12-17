@@ -19,18 +19,22 @@ set "formatend=[0m"
 		rem if FLAG, record the flag name
 		echo !ARG! | findstr "\--" > nul && (
 			if not ["!FLAG!"]==["0"] ( rem Check if FLAG is set - if it is, then previous was a boolean.
-				set "!FLAG!=true"
+				set "par_!FLAG!=true"
+				echo %iconyellow%par_!FLAG!=TRUE%formatend%
 			)
 			set ARG_NAME=!ARG:~2!
 			set "FLAG=!ARG_NAME!"
+			echo %iconyellow%FLAG=!ARG_NAME!%formatend%
 		) || (
 			set "par_!FLAG!=!ARG!"
+			echo %iconyellow%par_!FLAG!=!ARG!%formatend%
 			set "FLAG=0"
 		)
 	)
 
 	if not ["!FLAG!"]==["0"] ( rem Final boolean catch
 		set "par_!FLAG!=true"
+		echo %iconyellow%par_!FLAG!=TRUE%formatend%
 	)
 
 
@@ -41,9 +45,7 @@ if defined par_updated-from (
 	del "%par_updated-from:"=%"
 )
 
-echo %par_silent%
-pause
-
+pause rem remove
 
 :AskProceed
 	call:ClearAndTitle
@@ -56,8 +58,11 @@ pause
 
 :AskUpdate
 	call:ClearAndTitle
-	if %par_silent%==true (
+	if /i %par_silent%==true (
 		if not defined par_update (echo Error: --silent switch used but --update [true/false] not provided. & exit /b 1)
+		if /i %par_update%==false (goto FFMPEGLocation)
+		if /i %par_update%==true (goto AutoUpdate)
+		echo Error: --update argument invalid ^(should be [true/false]^). & exit /b 1
 	)
 	set /p "updateconfirmation=%icongray% ^ %formatend% Would you like to check for an update? %textgray%[Y/N]%formatend%: "
 	if /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
