@@ -49,7 +49,7 @@ pause rem remove
 
 :AskProceed
 	call:ClearAndTitle
-	if %par_silent%==true (goto AskUpdate)
+	if "%par_silent%"=="true" (goto AskUpdate)
 	echo %icongray% i %formatend% This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals.
 	set /p "startconfirmation=Do you want to proceed? %textgray%[Y/N]%formatend%: "
 	if /i "%startconfirmation%"=="n" exit
@@ -58,10 +58,11 @@ pause rem remove
 
 :AskUpdate
 	call:ClearAndTitle
-	if /i %par_silent%==true (
+	if /i "%par_silent%"=="true" (
 		if not defined par_update (echo Error: --silent switch used but --update [true/false] not provided. & exit /b 1)
-		if /i "%par_update:"=%"=="false" (goto FFMPEGLocation)
-		if /i "%par_update:"=%"=="true" (goto AutoUpdate)
+		set "par_update=%par_update:"=%"
+		if /i "%par_update%"=="false" (goto FFMPEGLocation)
+		if /i "%par_update%"=="true" (goto AutoUpdate)
 		echo Error: --update argument invalid ^(should be [true/false]^). & exit /b 1
 	)
 	set /p "updateconfirmation=%icongray% ^ %formatend% Would you like to check for an update? %textgray%[Y/N]%formatend%: "
@@ -113,12 +114,13 @@ pause rem remove
 
 :FFMPEGLocation
 	call:ClearAndTitle
-	if /i %par_silent%==true (
+	if /i "%par_silent%"=="true" (
 		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc [path] not provided. & exit /b 1)
-		if not exist "%par_ffmpegloc:"=%" (
+		set "par_ffmpegloc=%par_ffmpegloc:"=%"
+		if not exist "%par_ffmpegloc%" (
 			echo "Error: --ffmpegloc path provided does not exist." & exit /b 1
 		) else (
-			set "LOCATION=%par_ffmpegloc:"=%"
+			set "LOCATION=%par_ffmpegloc%"
 			goto Count
 		)
 	)
