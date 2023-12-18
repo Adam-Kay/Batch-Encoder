@@ -25,19 +25,9 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Installs winget to be used later
-      - name: Install winget
-        uses: Cyberboss/install-winget@v1
-
       # Runs a single command using the runners shell
-      - name: Test Echo Location
-        run: (Get-Location).Path
-
-      - name: Get files in dir
-        run: ls
-
-      - name: test ffmpeg WinGet
-        run: winget install --accept-source-agreements Gyan.FFmpeg.Essentials 
+      - name: Extract FFmpeg
+        run: Expand-Archive .\.github\workflows\test\ffmpeg-essential.zip -DestinationPath .\
 
       # Runs a set of commands using the runners shell
       - name: Test Multi-Line Echo
@@ -45,9 +35,9 @@ jobs:
           echo Add other actions to build,
           echo test, and deploy your project.
 
-      - name: Test encoder failure
+      - name: Running `batch encoder.bat`
         run: |
-          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc ffmpeg}
+          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc .\.github\workflows\test\ffmpeg.exe}
           
       # - name: Test failure
       #   run: cmd /c "exit /b 4"
