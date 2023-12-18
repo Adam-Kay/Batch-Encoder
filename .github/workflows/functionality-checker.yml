@@ -39,8 +39,10 @@ jobs:
 
       - name: Running `batch encoder.bat`
         run: |
-          ls .\.github\workflows\test\
-          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc .github\workflows\test\ffmpeg.exe}
+          mv ".\batch encoder.bat" ".\.github\workflows\test\batch encoder.bat"
+          cd .\.github\workflows\test\
+          ls
+          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc ffmpeg.exe}
           
       # - name: Test failure
       #   run: cmd /c "exit /b 4"
