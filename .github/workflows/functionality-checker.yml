@@ -25,6 +25,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      # Installs winget to be used later
+      - name: Install winget
+        uses: Cyberboss/install-winget@v1
+
       # Runs a single command using the runners shell
       - name: Test Echo Location
         run: (Get-Location).Path
