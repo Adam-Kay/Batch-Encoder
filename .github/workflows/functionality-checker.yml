@@ -31,18 +31,19 @@ jobs:
           Expand-Archive .\.github\workflows\test\ffmpeg-essential.zip -DestinationPath .\.github\workflows\test\
           ls .\.github\workflows\test\
 
-      # Runs a set of commands using the runners shell
-      - name: Test Multi-Line Echo
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+      - name: Input file exists
+        run: if (!(Test-Path '.\testvideo.mp4' )) { throw "Input video not present" }
 
-      - name: Running `batch encoder.bat`
+      - name: Run `batch encoder.bat`
         run: |
           mv ".\batch encoder.bat" ".\.github\workflows\test\batch encoder.bat"
           cd .\.github\workflows\test\
           ls
           Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc ffmpeg.exe}
           
-      # - name: Test failure
-      #   run: cmd /c "exit /b 4"
+      - name: Output file exists
+        run: if (!(Test-Path '.\testvideo.ENC.mp4' )) { throw "Output video not present" }
+
+      - name: Input file removed
+        run: if (Test-Path '.\testvideo.mp4' ) { throw "Input file still present after encode" }
+
