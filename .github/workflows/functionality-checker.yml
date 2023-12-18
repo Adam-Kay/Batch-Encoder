@@ -28,7 +28,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: Extract FFmpeg
         run: |
-          Expand-Archive .\.github\workflows\test\ffmpeg-essential.zip -DestinationPath .\
+          Expand-Archive .\.github\workflows\test\ffmpeg-essential.zip -DestinationPath .\.github\workflows\test\
           cd .\.github\workflows\test\
           ls
 
