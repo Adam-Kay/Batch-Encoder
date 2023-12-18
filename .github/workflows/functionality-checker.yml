@@ -32,6 +32,9 @@ jobs:
       - name: Get files in dir
         run: ls
 
+      - name: test ffmpeg WinGet
+        run: winget install --accept-source-agreements Gyan.FFmpeg.Essentials 
+
       # Runs a set of commands using the runners shell
       - name: Test Multi-Line Echo
         run: |
