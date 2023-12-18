@@ -47,7 +47,7 @@ jobs:
 
       - name: Test encoder failure
         run: |
-          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc F:\Adam\Desktop\youtube-dl.exe}
+          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc ffmpeg}
           
       # - name: Test failure
       #   run: cmd /c "exit /b 4"
