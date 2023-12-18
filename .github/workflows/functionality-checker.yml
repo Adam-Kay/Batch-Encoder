@@ -32,7 +32,7 @@ jobs:
           ls .\.github\workflows\test\
 
       - name: Input file exists
-        run: if (!(Test-Path '.\testvideo.mp4' )) { throw "Input video not present" }
+        run: if (!(Test-Path '.\.github\workflows\test\testvideo.mp4' )) { throw "Input file not present" }
 
       - name: Run `batch encoder.bat`
         run: |
@@ -42,8 +42,8 @@ jobs:
           Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc ffmpeg.exe}
           
       - name: Output file exists
-        run: if (!(Test-Path '.\testvideo.ENC.mp4' )) { throw "Output video not present" }
+        run: if (!(Test-Path '.\.github\workflows\test\testvideo.ENC.mp4' )) { throw "Output file not present" }
 
       - name: Input file removed
-        run: if (Test-Path '.\testvideo.mp4' ) { throw "Input file still present after encode" }
+        run: if (Test-Path '.\.github\workflows\test\testvideo.mp4' ) { throw "Input file still present after encode" }
 
