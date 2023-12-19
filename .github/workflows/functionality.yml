@@ -16,6 +16,31 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # Job name
+  encoder-vernum:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Move `batch encoder.bat`
+        run: mv ".\batch encoder.bat" ".\.github\workflows\test\batch encoder.bat"
+      
+      - name: Download latest release information
+        run: |
+          cd .\.github\workflows\test\
+          curl --silent -L -H "Accept: application/vnd.github+json" -o latestasset.json https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
+
+      - name: Compare version numbers
+        run: |
+          cd .\.github\workflows\test\
+          $currver = (Select-String "(?<=set CurrentVersion=).*$" '.\batch encoder.bat').Matches.Value
+          $latestvar = (Select-String "(?<=`"tag_name`": `").*(?=`")" .\latestasset.json).Matches.Value
+          if ($currver -eq $latestvar) { throw "Current version ($currver) matches latest release version ($latestvar)!" }
+
+  # Job name
   encoder-encode:
     # The type of runner that the job will run on
     runs-on: windows-latest
@@ -69,7 +94,7 @@ jobs:
           mv ".\batch encoder.bat" ".\.github\workflows\test\batch encoder.bat"
           cd .\.github\workflows\test\
           ls
-          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update true --ffmpegloc ffmpeg.exe}
+          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update force --ffmpegloc ffmpeg.exe}
           
       - name: Updated program file exists
         run: |
