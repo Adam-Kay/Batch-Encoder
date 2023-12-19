@@ -15,8 +15,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "function"
-  encode:
+  # Job name
+  encoder-encode:
     # The type of runner that the job will run on
     runs-on: windows-latest
 
@@ -25,14 +25,13 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
       - name: Extract FFmpeg
         run: |
           Expand-Archive .\.github\workflows\test\ffmpeg-essential.zip -DestinationPath .\.github\workflows\test\
           ls .\.github\workflows\test\
 
       - name: Input file exists
-        run: if (!(Test-Path '.\.github\workflows\test\testvideo.mp4' )) { throw "Input file not present" }
+        run: if (!(Test-Path '.\.github\workflows\test\testvideo.mp4' -pathtype leaf)) { throw "Input file not present" }
 
       - name: Run `batch encoder.bat`
         run: |
@@ -42,8 +41,65 @@ jobs:
           Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc ffmpeg.exe}
           
       - name: Output file exists
-        run: if (!(Test-Path '.\.github\workflows\test\testvideo.ENC.mp4' )) { throw "Output file not present" }
+        run: if (!(Test-Path '.\.github\workflows\test\testvideo.ENC.mp4' -pathtype leaf)) { throw "Output file not present" }
 
       - name: Input file removed
-        run: if (Test-Path '.\.github\workflows\test\testvideo.mp4' ) { throw "Input file still present after encode" }
+        run: if (Test-Path '.\.github\workflows\test\testvideo.mp4' -pathtype leaf) { throw "Input file still present after encode" }
+  
+  # Job name
+  encoder-update:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
 
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Extract FFmpeg
+        run: |
+          Expand-Archive .\.github\workflows\test\ffmpeg-essential.zip -DestinationPath .\.github\workflows\test\
+          ls .\.github\workflows\test\
+
+      - name: Remove input file
+        run: rm '.\.github\workflows\test\testvideo.mp4'
+
+      - name: Run `batch encoder.bat`
+        run: |
+          mv ".\batch encoder.bat" ".\.github\workflows\test\batch encoder.bat"
+          cd .\.github\workflows\test\
+          ls
+          Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update true --ffmpegloc ffmpeg.exe}
+          
+      - name: Updated program file exists
+        run: if (!(Test-Path '.\.github\workflows\test\batch encoder v*.bat' -pathtype leaf)) { throw "Updated program file not present" }
+
+      - name: Old program file removed
+        run: if (Test-Path '.\.github\workflows\test\batch encoder.bat' -pathtype leaf) { throw "Old program file still present after update" 
+
+# Job name
+  updater-update:
+    # The type of runner that the job will run on
+    runs-on: windows-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - name: Run `b-e updater.bat`
+        run: |
+          mv ".\batch encoder.bat" ".\.github\workflows\test\batch encoder.bat"
+          mv ".\b-e updater.bat" ".\.github\workflows\test\b-e updater.bat"
+          cd .\.github\workflows\test\
+          ls
+          Invoke-Command -ScriptBlock {& ".\b-e updater.bat" --silent}
+          
+      - name: Updated program file exists
+        run: if (!(Test-Path '.\.github\workflows\test\batch encoder v*.bat' -pathtype leaf)) { throw "Updated program file not present" }
+
+      - name: Old program file removed
+        run: if (Test-Path '.\.github\workflows\test\batch encoder.bat' -pathtype leaf) { throw "Old program file still present after update"
+
+      - name: Updater file removed
+        run: if (Test-Path '.\.github\workflows\test\b-e updater.bat' -pathtype leaf) { throw "Updater file still present after update" 
