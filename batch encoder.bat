@@ -60,11 +60,12 @@ if defined par_updated-from (
 :AskUpdate
 	call:ClearAndTitle
 	if /i "%par_silent%"=="true" (
-		if not defined par_update (echo Error: --silent switch used but --update [true/false] not provided. & exit /b 1)
+		if not defined par_update (echo Error: --silent switch used but --update ^(true^|false^|force^) not provided. & exit /b 1)
 		set "par_update=%par_update:"=%"
 		if /i "%par_update%"=="false" (goto FFMPEGLocation)
 		if /i "%par_update%"=="true" (goto AutoUpdate)
-		echo Error: --update argument invalid ^(should be [true/false]^). & exit /b 1
+		if /i "%par_update%"=="force" (goto AutoUpdate)
+		echo Error: --update argument invalid ^(should be ^(true^|false^|force^)^). & exit /b 1
 	)
 	set /p "updateconfirmation=%icongray% ^ %formatend% Would you like to check for an update? %textgray%[Y/N]%formatend%: "
 	if /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
@@ -92,34 +93,41 @@ if defined par_updated-from (
 	if exist "batch encoder %UpdateVersion%.bat" set "append=_new"
 
 	echo.
-	if /i "%UpdateVersion%"=="%CurrentVersion%" (
-		echo %icongray% - %formatend% Current version is up-to-date.
-		echo.
-		echo The program will now restart.
-		call:GrayPause
-		del "%updateFileName%"
-		if /i "%par_silent%"=="true" (
-			(goto) 2>nul & "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
-		) else (
-			(goto) 2>nul & "%~f0"
+	if /i not "%par_update%"=="force" (
+		if /i "%UpdateVersion%"=="%CurrentVersion%" (
+			echo %icongray% - %formatend% Current version is up-to-date.
+			echo.
+			echo The program will now restart.
+			call:GrayPause
+			del "%updateFileName%"
+			if /i "%par_silent%"=="true" (
+				(goto) 2>nul & "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+			) else (
+				(goto) 2>nul & "%~f0"
+			)
 		)
+	)
+	if /i "%par_update%"=="force" (
+		echo %iconyellow% ^^! %formatend% Version found^^! ^(%textgreen%%UpdateVersion%%formatend%^)
+		echo Proceeding with force update in 5 seconds; close window to cancel.
 	) else (
 		echo %iconyellow% ^^! %formatend% Differing version found^^! ^(%textred%%CurrentVersion%%formatend% -^> %textgreen%%UpdateVersion%%formatend%^)
 		echo Proceeding with update in 5 seconds; close window to cancel.
-		echo.
-		timeout /nobreak /t 5 > nul
-		echo Downloading files...
-		curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%.bat" %UpdateAPIURL%
-		echo.
-		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
-		call:GrayPause
-		del "%updateFileName%"
-		if /i "%par_silent%"=="true" (
-			(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
-		) else (
-			(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
-		)
 	)
+	echo.
+	timeout /nobreak /t 5 > nul
+	echo Downloading files...
+	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%.bat" %UpdateAPIURL%
+	echo.
+	echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
+	call:GrayPause
+	del "%updateFileName%"
+	if /i "%par_silent%"=="true" (
+		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+	) else (
+		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
+	)
+	
 
 :FFMPEGLocation
 	call:ClearAndTitle
