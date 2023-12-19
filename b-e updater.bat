@@ -10,8 +10,14 @@ set "textred=[31m"
 set "formatend=[0m"
 
 
+if /i "%1"=="--silent" (
+	set "par_silent=true"
+)
+
+
 :AskProceed
 	cls
+	if "%par_silent%"=="true" (goto AskFile)
 	SET /p "ProceedConf=%icongray% i %formatend% This program will attempt to forcibly update the batch encoder script. Do you want to proceed? %textgray%[Y/N]%formatend%: "
 	IF /i "%ProceedConf%"=="n" exit
 	IF /i "%ProceedConf%"=="y" (goto AskFile)
@@ -20,9 +26,12 @@ set "formatend=[0m"
 	
 :AskFile
 	cls
-	set CONFIRMATION=
 	for %%f in (*batch*encode*.bat) do (
-		SET /p "FileConf=%icongray% ? %formatend% Is this the current batch encoder script file?: '%%f' %textgray%[Y/N]%formatend%: "
+		if "%par_silent%"=="true" (
+			set "FileConf=y"
+		) else (
+			SET /p "FileConf=%icongray% ? %formatend% Is this the current batch encoder script file?: '%%f' %textgray%[Y/N]%formatend%: "
+		)
 		IF /i "!FileConf!"=="y" (
 			set BEFile=%%f
 			goto Update
@@ -71,7 +80,12 @@ set "formatend=[0m"
 	echo Downloading files...
 	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
 	echo.
-	echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
+	if "%par_silent%"=="true" (
+		echo %icongreen% i %formatend% Download complete. The program will now clean up and exit.
+	) else (
+		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
+	)
+	
 	call:GrayPause
 	if defined BEFile (
 		if not "%BEFile%"=="batch encoder %UpdateVersion%.bat" (
@@ -79,8 +93,12 @@ set "formatend=[0m"
 		)
 	)
 	del "%updateFileName%"
-	(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
-	
+	if "%par_silent%"=="true" (
+		(goto) 2>nul & del "%~f0"
+	) else (
+		(goto) 2>nul & "batch encoder %UpdateVersion%.bat" --updated-from "%~f0"
+	)
+
 :AutoUpdateError
 	del "%updateFileName%"
 	echo.
@@ -96,6 +114,6 @@ set "formatend=[0m"
 	
 :GrayPause
 	echo %textgray%
-	pause
+	if /i not "%par_silent%"=="true" (pause)
 	echo %formatend%
 	goto:eof
