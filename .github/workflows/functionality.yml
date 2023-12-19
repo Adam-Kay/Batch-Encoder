@@ -104,4 +104,4 @@ jobs:
         run: if (Test-Path '.\.github\workflows\test\batch encoder.bat' -pathtype leaf) { throw "Old program file still present after update" }
 
       - name: Updater file removed
-        run: if (Test-Path '.\.github\workflows\test\b-e updater.bat' -pathtype leaf) { throw "Updater file still present after update" 
+        run: if (Test-Path '.\.github\workflows\test\b-e updater.bat' -pathtype leaf) { throw "Updater file still present after update" }        
