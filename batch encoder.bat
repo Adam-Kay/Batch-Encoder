@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.6.1
+set CurrentVersion=v1.6.2
 cls
 
 set "icongray=[7;90m"
