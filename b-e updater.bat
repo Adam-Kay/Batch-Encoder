@@ -4,6 +4,7 @@ setlocal enabledelayedexpansion
 set "icongray=[7;90m"
 set "iconyellow=[7;33m"
 set "icongreen=[7;32m"
+set "iconred=[7;31m"
 set "textgray=[90m"
 set "textgreen=[32m"
 set "textred=[31m"
@@ -58,7 +59,7 @@ if /i "%1"=="--silent" (
 	echo %icongray% i %formatend% Downloading information...
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
-	rem curl --silent -o batch_update.txt https://gist.githubusercontent.com/Adam-Kay/ec5da0ff40e8eb14beee2242161f5191/raw
+	if not exist "%updateFileName%" (goto AutoUpdateError)
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "ver_entry="
@@ -80,6 +81,15 @@ if /i "%1"=="--silent" (
 	echo Downloading files...
 	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
 	echo.
+	if not exist "batch encoder %UpdateVersion%.bat" (
+		echo %iconred% ^^! %formatend% Download failed. & echo. & echo Attempting alternate download...
+		curl --silent --ssl-no-revoke -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
+		echo.
+		if not exist "batch encoder %UpdateVersion%.bat" (
+			echo %iconred% ^^! %formatend% Alternate download failed.
+			goto AutoUpdateError
+		)
+	)
 	if "%par_silent%"=="true" (
 		echo %icongreen% i %formatend% Download complete. The program will now clean up and exit.
 	) else (
