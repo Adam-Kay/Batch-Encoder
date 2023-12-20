@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.6.2
+set CurrentVersion=v1.6.3
 cls
 
 set "icongray=[7;90m"
@@ -150,6 +150,7 @@ if defined par_updated-from (
 	set "TOTAL=%COUNTER%"
 	
 	set /a "COUNTER=0"
+	set /a "VALIDCOUNTER=0"
 	set "INPUTFILE="
 
 :Conversion
@@ -192,6 +193,7 @@ if defined par_updated-from (
 					)
 				)
 				
+				set /a "VALIDCOUNTER+=1" 
 				echo Supported file found^: ^(!INPUTFILE!^)
 				if /i "!outputfiledupe!"=="true" (echo Proposed output file already exists^^^! Appending timestamp...)
 				
@@ -235,7 +237,10 @@ if defined par_updated-from (
 	)
 	
 call:ClearAndTitle
-echo [42;97m Completed encoding %TOTAL% files. %formatend%
+set /a "SKIPCOUNTER=%TOTAL%-%VALIDCOUNTER%
+if %VALIDCOUNTER% gtr 0 (echo [42;97m Completed encoding %VALIDCOUNTER% files. %formatend%)
+if %SKIPCOUNTER% gtr 0 (echo [100;37m Skipped %SKIPCOUNTER% invalid files. %formatend%)
+if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 
 :EndPause
 	call:GrayPause
