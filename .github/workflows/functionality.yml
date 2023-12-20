@@ -69,7 +69,7 @@ jobs:
           Invoke-Command -ScriptBlock {& ".\batch encoder.bat" --silent --update false --ffmpegloc ffmpeg.exe}
           
       - name: Output file exists
-        run: if (!(Test-Path '.\.github\workflows\test\testvideo.ENC.mp4' -pathtype leaf)) { throw "Output file not present" }
+        run: if (!(Test-Path '.\.github\workflows\test\testvideo.ENC*.mp4' -pathtype leaf)) { throw "Output file not present" }
 
       - name: Input file removed
         run: if (Test-Path '.\.github\workflows\test\testvideo.mp4' -pathtype leaf) { throw "Input file still present after encode" }

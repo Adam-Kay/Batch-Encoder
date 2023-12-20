@@ -157,6 +157,7 @@ if defined par_updated-from (
 	
 		call:ClearAndTitle
 		
+		set "outputfiledupe=false"
 		set "INPUTFILE=%%f"
 		set "INPUTFILE=!INPUTFILE:~2!
 		rem ^ removing ".\" from start of filename
@@ -176,12 +177,23 @@ if defined par_updated-from (
 			) else ( 
 				set "TESTSTRING=!INPUTFILE:~-8!"
 				if /i "!TESTSTRING!"==".DVR.mp4" (
-					set "OUTPUTFILE=!INPUTFILE:~0,-8!.ENC.mp4"
+					if not exist "!INPUTFILE:~0,-8!.ENC.mp4" (
+						set "OUTPUTFILE=!INPUTFILE:~0,-8!.ENC.mp4"
+					) else (
+						set "outputfiledupe=true"
+						set "OUTPUTFILE=!INPUTFILE:~0,-8!_!date!-!time::=-!.ENC.mp4"
+					)
 				) else (
-					set "OUTPUTFILE=!INPUTFILE:~0,-4!.ENC.mp4"
+					if not exist "!INPUTFILE:~0,-4!.ENC.mp4" (
+						set "OUTPUTFILE=!INPUTFILE:~0,-4!.ENC.mp4"
+					) else (
+						set "outputfiledupe=true"
+						set "OUTPUTFILE=!INPUTFILE:~0,-4!_!date!-!time::=-!.ENC.mp4"
+					)
 				)
 				
 				echo Supported file found^: ^(!INPUTFILE!^)
+				if /i "!outputfiledupe!"=="true" (echo Proposed output file already exists^^^! Appending timestamp...)
 				
 				call:GrayTimeout 5
 			
