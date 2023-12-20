@@ -56,6 +56,7 @@ if /i "%1"=="--silent" (
 
 :Update
 	cls
+	if exist "batch encoder %UpdateVersion%%append%-u.bat" (del "batch encoder %UpdateVersion%%append%-u.bat")
 	echo %icongray% i %formatend% Downloading information...
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
@@ -79,17 +80,18 @@ if /i "%1"=="--silent" (
 	echo.
 	timeout /nobreak /t 5 > nul
 	echo Downloading files...
-	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
+	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%-u.bat" %UpdateAPIURL%
 	echo.
-	if not exist "batch encoder %UpdateVersion%.bat" (
+	if not exist "batch encoder %UpdateVersion%-u.bat" (
 		echo %iconred% ^^! %formatend% Download failed. & echo. & echo Attempting alternate download...
-		curl --silent --ssl-no-revoke -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%.bat" %UpdateAPIURL%
+		curl --silent --ssl-no-revoke -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%-u.bat" %UpdateAPIURL%
 		echo.
-		if not exist "batch encoder %UpdateVersion%.bat" (
+		if not exist "batch encoder %UpdateVersion%-u.bat" (
 			echo %iconred% ^^! %formatend% Alternate download failed.
 			goto AutoUpdateError
 		)
 	)
+	move /Y "batch encoder %UpdateVersion%%append%-u.bat" "batch encoder %UpdateVersion%%append%.bat" > nul
 	if "%par_silent%"=="true" (
 		echo %icongreen% i %formatend% Download complete. The program will now clean up and exit.
 	) else (
