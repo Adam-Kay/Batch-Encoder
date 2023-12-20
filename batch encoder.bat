@@ -101,7 +101,7 @@ if defined par_updated-from (
 			call:GrayPause
 			del "%updateFileName%"
 			if /i "%par_silent%"=="true" (
-				(goto) 2>nul & "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+				(goto) 2>nul & "%~f0" %* --update false
 			) else (
 				(goto) 2>nul & "%~f0"
 			)
@@ -123,7 +123,7 @@ if defined par_updated-from (
 	call:GrayPause
 	del "%updateFileName%"
 	if /i "%par_silent%"=="true" (
-		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" --silent --update false --ffmpegloc "%par_ffmpegloc%"
+		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" %* --update false
 	) else (
 		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
 	)
