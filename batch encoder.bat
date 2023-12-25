@@ -160,8 +160,20 @@ if defined par_updated-from (
 		)
 	)
 	set /p "LOCATION=%icongray% ? %formatend% Where is FFMPEG.exe located? (paste full path): "
+	if not exist "%LOCATION%" (
+		if not exist "%cd%\%LOCATION%" (
+			echo.
+			echo Error: Provided filepath "%LOCATION%" does not exist.
+			call:GrayPause
+			goto FFMPEGLocation
+		)
+	)
 
 :Count
+	set "LOC_TEST=%LOCATION:\=%"
+	set "LOC_TEST=%LOC_TEST:/=%"
+	if "%LOC_TEST%"=="%LOCATION%" (set "pwsh_prefix=.\")
+	set "LOCATION_pwsh=%pwsh_prefix%%LOCATION%
 	set /a "COUNTER=-1"
 	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
@@ -233,15 +245,18 @@ if defined par_updated-from (
 				echo.
 				
 				echo %icongray% ^| %formatend% Checking output file length...
-				for /F "tokens=*" %%g in (
-					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!INPUTFILE!'), 27)"'
+				for /F "tokens=*" %%g in ( 'powershell -Command "(%LOCATION_pwsh% -i '!INPUTFILE!' 2>&1 | select-String 'Duration: (.*), s').Matches.Groups[1].Value"'
 					) do (set LEN_INP=%%g)
-				for /F "tokens=*" %%g in (
-					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"'
+				for /F "tokens=*" %%g in ( 'powershell -Command "(%LOCATION_pwsh% -i '!OUTPUTFILE!' 2>&1 | select-String 'Duration: (.*), s').Matches.Groups[1].Value"'
 					) do (set LEN_OUT=%%g)
+				for /F "tokens=*" %%g in ( 'powershell -Command "[Math]::Abs(((Get-Date !LEN_INP!) - (Get-Date !LEN_OUT!)).TotalSeconds)"'
+					) do (set LEN_DIFF=%%g)
+				
 				echo Input file: !LEN_INP! - Output file: !LEN_OUT!
-				if /i not "!LEN_INP!"=="!LEN_OUT!" (goto CritError)
-				echo - File lengths match^^!
+				if !LEN_DIFF! gtr 1 (
+					call:CritError "File length disparity outside of acceptable range ^(was !LEN_DIFF! seconds^^^)
+				)
+				echo - File lengths within range^^!
 				echo.
 				echo %icongreen% ^| %formatend% Safely proceeding with input file recycling...
 				timeout /nobreak /t 1 > nul
@@ -264,14 +279,16 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 
 :EndPause
 	call:GrayPause
-	exit /b 0
+	(goto) 2>nul || exit /b 0
 	
 :CritError
-	timeout /t 1
+	timeout /t 1 > nul
 	echo.
 	call:ErrorLine
 	echo.
 	echo A critical error occurred. The latest file has not been modified.
+	set errmsg=%~1
+	if defined errmsg (echo Error message provided: %errmsg%)
 	if /i "%par_silent%"=="true" (exit /b 3)
 	goto EndPause
 	
