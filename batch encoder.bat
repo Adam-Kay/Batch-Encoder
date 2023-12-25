@@ -215,8 +215,11 @@ if defined par_updated-from (
 				if /i "!outputfiledupe!"=="true" (echo Proposed output file already exists^^^! Appending timestamp...)
 				
 				call:GrayTimeout 5
+				
+				rem Move cursor 3 lines up
+				echo [3A
 			
-				%LOCATION% -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
+				%LOCATION% -v quiet -stats -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
 				
 				echo.
 				echo.
@@ -237,7 +240,7 @@ if defined par_updated-from (
 					'powershell -Command "$Shell = New-Object -ComObject Shell.Application; $Folder = $Shell.Namespace('%cd%'); $Folder.GetDetailsOf($Folder.ParseName('!OUTPUTFILE!'), 27)"'
 					) do (set LEN_OUT=%%g)
 				echo Input file: !LEN_INP! - Output file: !LEN_OUT!
-				if /i not "!LEN_INP!"=="!LEN_OUT!" goto CritError
+				if /i not "!LEN_INP!"=="!LEN_OUT!" (goto CritError)
 				echo - File lengths match^^!
 				echo.
 				echo %icongreen% ^| %formatend% Safely proceeding with input file recycling...
