@@ -13,11 +13,10 @@ set "textgreen=[32m"
 set "textred=[31m"
 set "formatend=[0m"
 
-:ArgParser
-	set allargs=%*
-	rem If debug included in args
-	if not "%allargs%"=="%allargs:--debug=%" (set "par_debug=true")
 
+for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
+	
+:ArgParser
 	set "FLAG=0"
 	for %%G in (%*) DO (
 		set ARG=%%G
@@ -72,6 +71,7 @@ if defined par_updated-from (
 		if /i "%par_update%"=="force" (goto AutoUpdate)
 		echo Error: --update argument invalid ^(should be ^(true^|false^|force^)^). & exit /b 1
 	)
+	if /i "%par_update%"=="force" (goto AutoUpdate)
 	set /p "updateconfirmation=%icongray% ^ %formatend% Would you like to check for an update? %textgray%[Y/N]%formatend%: "
 	if /i "%updateconfirmation%"=="n" (goto FFMPEGLocation)
 	if /i "%updateconfirmation%"=="y" (goto AutoUpdate)
