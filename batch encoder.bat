@@ -160,6 +160,7 @@ if defined par_updated-from (
 		)
 	)
 	set /p "LOCATION=%icongray% ? %formatend% Where is FFMPEG.exe located? (paste full path): "
+	set "LOCATION=%LOCATION:"=%"
 	if not exist "%LOCATION%" (
 		if not exist "%cd%\%LOCATION%" (
 			echo.
@@ -173,7 +174,7 @@ if defined par_updated-from (
 	set "LOC_TEST=%LOCATION:\=%"
 	set "LOC_TEST=%LOC_TEST:/=%"
 	if "%LOC_TEST%"=="%LOCATION%" (set "pwsh_prefix=.\")
-	set "LOCATION_pwsh=%pwsh_prefix%%LOCATION%
+	set "LOCATION_pwsh=%pwsh_prefix%%LOCATION:"=%
 	set /a "COUNTER=-1"
 	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
@@ -231,7 +232,7 @@ if defined par_updated-from (
 				rem Move cursor 3 lines up
 				echo [3A
 			
-				%LOCATION% -v quiet -stats -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
+				"%LOCATION%" -v quiet -stats -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
 				
 				echo.
 				echo.
@@ -245,9 +246,9 @@ if defined par_updated-from (
 				echo.
 				
 				echo %icongray% ^| %formatend% Checking output file length...
-				for /F "tokens=*" %%g in ( 'powershell -Command "(%LOCATION_pwsh% -i '!INPUTFILE!' 2>&1 | select-String 'Duration: (.*), s').Matches.Groups[1].Value"'
+				for /F "tokens=*" %%g in ( 'powershell -Command "(^& '%LOCATION_pwsh%' -i '!INPUTFILE!' 2>&1 | select-String 'Duration: (.*), s').Matches.Groups[1].Value"'
 					) do (set LEN_INP=%%g)
-				for /F "tokens=*" %%g in ( 'powershell -Command "(%LOCATION_pwsh% -i '!OUTPUTFILE!' 2>&1 | select-String 'Duration: (.*), s').Matches.Groups[1].Value"'
+				for /F "tokens=*" %%g in ( 'powershell -Command "(^& '%LOCATION_pwsh%' -i '!OUTPUTFILE!' 2>&1 | select-String 'Duration: (.*), s').Matches.Groups[1].Value"'
 					) do (set LEN_OUT=%%g)
 				for /F "tokens=*" %%g in ( 'powershell -Command "[Math]::Abs(((Get-Date !LEN_INP!) - (Get-Date !LEN_OUT!)).TotalSeconds)"'
 					) do (set LEN_DIFF=%%g)
