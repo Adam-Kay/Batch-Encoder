@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.6.3
+set CurrentVersion=v1.6.4
 cls
 
 set "icongray=[7;90m"
@@ -14,6 +14,10 @@ set "textred=[31m"
 set "formatend=[0m"
 
 :ArgParser
+	set allargs=%*
+	rem If debug included in args
+	if not "%allargs%"=="%allargs:--debug=%" (set "par_debug=true")
+
 	set "FLAG=0"
 	for %%G in (%*) DO (
 		set ARG=%%G
@@ -21,24 +25,24 @@ set "formatend=[0m"
 		echo !ARG! | findstr "\--" > nul && (
 			if not ["!FLAG!"]==["0"] ( rem Check if FLAG is set - if it is, then previous was a boolean.
 				set "par_!FLAG!=true"
-				echo %iconyellow%par_!FLAG!=TRUE%formatend%
+				if "%par_debug%"=="true" (echo %iconyellow%par_!FLAG!=TRUE%formatend%)
 			)
 			set ARG_NAME=!ARG:~2!
 			set "FLAG=!ARG_NAME!"
-			echo %iconyellow%FLAG=!ARG_NAME!%formatend%
+			if "%par_debug%"=="true" (echo %iconyellow%FLAG=!ARG_NAME!%formatend%)
 		) || (
 			set "par_!FLAG!=!ARG!"
-			echo %iconyellow%par_!FLAG!=!ARG!%formatend%
+			if "%par_debug%"=="true" (echo %iconyellow%par_!FLAG!=!ARG!%formatend%)
 			set "FLAG=0"
 		)
 	)
 
 	if not ["!FLAG!"]==["0"] ( rem Final boolean catch
 		set "par_!FLAG!=true"
-		echo %iconyellow%par_!FLAG!=TRUE%formatend%
+		if "%par_debug%"=="true" (echo %iconyellow%par_!FLAG!=TRUE%formatend%)
 	)
 
-rem pause
+if "%par_debug%"=="true" (pause)
 cls
 
 if defined par_updated-from (
