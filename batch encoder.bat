@@ -184,6 +184,7 @@ if defined par_updated-from (
 	set "INPUTFILE="
 
 :Conversion
+	if /i not "%par_verbose%"=="true" (set "quietargs=-v quiet -stats ")
 	for %%f in (.\*) do (
 	
 		call:ClearAndTitle
@@ -232,7 +233,7 @@ if defined par_updated-from (
 				rem Move cursor 3 lines up
 				echo [3A
 			
-				"%LOCATION%" -v quiet -stats -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
+				"%LOCATION%" %quietargs% -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
 				
 				echo.
 				echo.
