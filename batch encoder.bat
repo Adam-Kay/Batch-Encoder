@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.6.4
+set CurrentVersion=v1.6.5
 cls
 
 set "icongray=[7;90m"
@@ -55,7 +55,7 @@ if defined par_updated-from (
 :AskProceed
 	call:ClearAndTitle
 	if "%par_silent%"=="true" (goto AskUpdate)
-	echo %icongray% i %formatend% This program will aim to encode all .mp4 files in the folder it's placed in and delete the originals.
+	echo %icongray% i %formatend% This program will aim to encode all .mp4 files in the folder it's placed in and recycle the originals.
 	set /p "startconfirmation=Do you want to proceed? %textgray%[Y/N]%formatend%: "
 	if /i "%startconfirmation%"=="n" exit
 	if /i "%startconfirmation%"=="y" (goto AskUpdate)
