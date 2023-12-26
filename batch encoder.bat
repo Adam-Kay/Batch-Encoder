@@ -12,6 +12,10 @@ set "textgray=[90m"
 set "textgreen=[32m"
 set "textred=[31m"
 set "formatend=[0m"
+(set eline=^
+%=this line is empty=%
+)
+set "space= "
 
 
 for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
@@ -84,18 +88,34 @@ if defined par_updated-from (
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	if not exist "%updateFileName%" (goto AutoUpdateError)
+	echo.
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
-	<%TEMP%\batch_update.tmp set /p "ver_entry="
-	set "ver=%ver_entry:~15,-2%"
+	<%TEMP%\batch_update.tmp set /p "entry_ver="
+	set "ver=%entry_ver:~15,-2%"
 	set "UpdateVersion=v%ver:~1%"
+	
+	>%TEMP%\batch_update.tmp findstr "body" %updateFileName%
+	<%TEMP%\batch_update.tmp set /p "entry_body="
+	set "changelog=%entry_body:~11,-1%"
+	set "changelog=%changelog:\n#=\n\r\n#%"
+	set "changelog=%changelog:#=[100;37m#%"
+	set "changelog=%changelog:\r=!formatend!\r%"
+	set "changelog=%changelog: `= [1m%"
+	set "changelog=%changelog:` =!formatend! %"
+	>%TEMP%\batch_update.tmp echo %changelog%
+	for %%? in (%TEMP%\batch_update.tmp) do (set /A strlength=%%~z? - 2)
+	if %strlength% gtr 1000 (set "changelog=%changelog:~0,1000%... %textgray%[More]%formatend%")
+	echo %changelog:\r\n=!eline!%%formatend%
+	echo.
+	pause
 	
 	set regex_command=powershell -Command "$x = Get-Content %updateFileName% -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
-	for /F "tokens=*" %%g in ('%regex_command%') do (set API_link_entry=%%g)
-	set "UpdateAPIURL=%API_link_entry:~1,-2%"
+	for /F "tokens=*" %%g in ('%regex_command%') do (set entry_APILink=%%g)
+	set "UpdateAPIURL=%entry_APILink:~1,-2%"
 
-	for %%a in (ver_entry, API_link_entry, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
+	for %%a in (entry_ver, entry_APILink, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
 	
 	if exist "batch encoder %UpdateVersion%.bat" set "append=_new"
 
