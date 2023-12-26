@@ -1,5 +1,5 @@
 # Batch-Encoder
-A small personal project. A .bat file which uses FFMPEG to encode a folder full of video files.
+A small personal project. A .bat file which uses FFmpeg to encode a folder full of video files.
 
 ## Dependencies:
 - [FFmpeg](https://github.com/GyanD/codexffmpeg)
