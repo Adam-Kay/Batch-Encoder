@@ -11,6 +11,7 @@ set "iconred=[7;31m"
 set "textgray=[90m"
 set "textgreen=[32m"
 set "textred=[31m"
+set "textcyan=[36m"
 set "formatend=[0m"
 (set eline=^
 %=this line is empty=%
@@ -181,7 +182,7 @@ if defined par_updated-from (
 			exit /b 1
 		) else (
 			set "LOCATION=%par_ffmpegloc%"
-			goto Count
+			goto EncodingOptSelect
 		)
 	)
 	set /p "LOCATION=%icongray% ? %formatend% Where is FFMPEG.exe located? (paste full path): "
@@ -195,8 +196,70 @@ if defined par_updated-from (
 		)
 	)
 
-REM TODO: Add advanced encode options (#37)
+:EncodingOptSelect
+	call:ClearAndTitle
+	rem Remove in future release:
+	if "%CurrentVersion%"=="v1.7.0" (echo [100m NEW^^! %formatend%) 
+	echo There are multiple encoding options available. If you are not sure which to choose, select 'Simple'.
+	echo.
+	echo [%textcyan%s%formatend%] Simple encode - default options, and the one used in previous versions.
+	echo [%textcyan%a%formatend%] Advanced encode - options to control quality and speed of output video.
+	echo.
+	set /p "encodeopt=Option: "
+	if /i "%encodeopt%"=="s" (goto Count)
+	if /i "%encodeopt%"=="a" (goto AdvancedEncodeSpeed)
+	goto EncodingOptSelect
+	
+:AdvancedEncodeSpeed
+	call:ClearAndTitle "Advanced Encoding"
+	set "speeds[1]=ultrafast" & set "speeds[2]=superfast" & set "speeds[3]=veryfast" & set "speeds[4]=faster" & set "speeds[5]=fast"
+	set "speeds[6]=medium" & set "speeds[7]=slow" & set "speeds[8]=slower" & set "speeds[9]=veryslow" & set "speeds[d]=medium"
+	
+	echo [100m Speed %formatend%
+	echo.
+	echo Please enter a value between 1 and 9, where 1 is the fastest speed and 9 is the slowest - or enter [%textcyan%d%formatend%] for default ^(6^).
+	echo.
+	echo  Faster Speed		    		    Slower Speed
+	echo  Larger Filesize		   	Smaller Filesize
+	echo 	[90m^|					^|[0m
+	echo 	[90m+----+----+----+----+----+----+----+----+[0m
+	echo 	1    2    3    4    5    6    7    8    9
+	echo 				 [90m^|[0m
+	echo 			      Default
+	echo.
+	
+	set /p "speed_inp=Speed: "
+	set "speed_choice=!speeds[%speed_inp%]!
+	if not defined speed_choice (goto AdvancedEncodeSpeed)
 
+:AdvancedEncodeQuality
+	call:ClearAndTitle "Advanced Encoding"
+	echo [100m Quality %formatend%
+	echo.
+	echo Please select a value between 1 and 9, where 1 is the highest quality and 9 is the lowest - or enter [%textcyan%d%formatend%] for default ^(4^).
+	echo.
+	echo  Higher Quality		    		   Lower Quality
+	echo  Larger Filesize		   	Smaller Filesize
+	echo 	[90m^|					^|[0m
+	echo 	[90m+----+----+----+----+----+----+----+----+[0m
+	echo 	1    2    3    4    5    6    7    8    9
+	echo 		       [90m^|[0m
+	echo 		    Default
+	echo.
+
+	set /p "quality_inp=Quality: "
+	if %quality_inp: =0% geq 1 (
+		if %quality_inp: =0% leq 9 (
+			set /a "quality_choice=%quality_inp%+0"
+			goto Count
+		)
+	)
+	if /i "%quality_input%"=="d" (
+		set "quality_choice=4"
+		goto Count
+	)
+	goto AdvancedEncodeQuality
+	
 :Count
 	set "LOC_TEST=%LOCATION:\=%"
 	set "LOC_TEST=%LOC_TEST:/=%"
@@ -359,6 +422,8 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 
 :ClearAndTitle
 	cls
-	echo [7m Batch Encoder %CurrentVersion% %formatend%
+	set "message=%~1"
+	if defined message (set "message=- %message% ")
+	echo [7m Batch Encoder %CurrentVersion% %message%%formatend%
 	echo.
 	goto:eof
