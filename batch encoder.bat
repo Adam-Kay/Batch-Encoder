@@ -195,6 +195,8 @@ if defined par_updated-from (
 		)
 	)
 
+REM TODO: Add advanced encode options (#37)
+
 :Count
 	set "LOC_TEST=%LOCATION:\=%"
 	set "LOC_TEST=%LOC_TEST:/=%"
