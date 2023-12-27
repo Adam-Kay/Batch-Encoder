@@ -22,6 +22,7 @@ jobs:
   encoder-vernum:
     # The type of runner that the job will run on
     runs-on: windows-latest
+    timeout-minutes: 5
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -47,6 +48,7 @@ jobs:
   encoder-encode:
     # The type of runner that the job will run on
     runs-on: windows-latest
+    timeout-minutes: 5
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -78,6 +80,7 @@ jobs:
   encoder-update:
     # The type of runner that the job will run on
     runs-on: windows-latest
+    timeout-minutes: 5
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -110,6 +113,7 @@ jobs:
   updater-update:
     # The type of runner that the job will run on
     runs-on: windows-latest
+    timeout-minutes: 5
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
