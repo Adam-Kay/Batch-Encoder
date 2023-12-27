@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.6.5
+set CurrentVersion=v1.7.0
 cls
 
 set "icongray=[7;90m"
@@ -88,7 +88,6 @@ if defined par_updated-from (
 	set "updateFileName=batch_update.json"
 	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	if not exist "%updateFileName%" (goto AutoUpdateError)
-	echo.
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "entry_ver="
@@ -106,9 +105,6 @@ if defined par_updated-from (
 	>%TEMP%\batch_update.tmp echo %changelog%
 	for %%? in (%TEMP%\batch_update.tmp) do (set /A strlength=%%~z? - 2)
 	if %strlength% gtr 1000 (set "changelog=%changelog:~0,1000%... %textgray%[More]%formatend%")
-	echo %changelog:\r\n=!eline!%%formatend%
-	echo.
-	pause
 	
 	set regex_command=powershell -Command "$x = Get-Content %updateFileName% -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
@@ -156,7 +152,13 @@ if defined par_updated-from (
 		)
 	)
 	move /Y "batch encoder %UpdateVersion%%append%-u.bat" "batch encoder %UpdateVersion%%append%.bat" > nul
-	echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
+	echo %icongreen% i %formatend% Download complete. 
+	echo. & echo.
+	echo %changelog:\r\n=!eline!%%formatend%
+	echo.
+	echo You can read the full changelog at: https://github.com/Adam-Kay/Batch-Encoder/releases
+	echo.
+	echo The program will now clean up and restart.
 	call:GrayPause
 	del "%updateFileName%"
 	if /i "%par_silent%"=="true" (
@@ -220,7 +222,6 @@ if defined par_updated-from (
 		) else (
 			set /a "COUNTER+=1" 
 			echo [100m Encoding !COUNTER! of %TOTAL% %formatend%
-			rem echo **********************************
 				
 			set "TESTSTRING=!INPUTFILE:~-4!"
 			if /i not "!TESTSTRING!"==".mp4" (
@@ -262,7 +263,7 @@ if defined par_updated-from (
 				echo.
 				
 				echo %icongray% ^| %formatend% Checking for output file...
-				if /i not exist "%CD%\!OUTPUTFILE!" goto CritError
+				if /i not exist "%CD%\!OUTPUTFILE!" call:CritError "Output file '!OUTPUTFILE!' does not exist."
 				echo - Output file exists^^!
 				echo.
 				
