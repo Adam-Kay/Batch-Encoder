@@ -137,9 +137,12 @@ if defined par_updated-from (
 		echo %iconyellow% ^^! %formatend% Differing version found^^! ^(%textred%%CurrentVersion%%formatend% -^> %textgreen%%UpdateVersion%%formatend%^)
 		echo Proceeding with update in 5 seconds; close window to cancel.
 	)
-	echo.
-	timeout /nobreak /t 5 > nul
-	echo Downloading files...
+	echo. & echo [s
+	for /l %%x in (1, 1, 6) do (
+		timeout /nobreak /t 1 > nul
+		echo [u.[s
+	)
+	echo [1ADownloading files...
 	curl --silent -L -H "Accept: application/octet-stream" -o "batch encoder %UpdateVersion%%append%-u.bat" %UpdateAPIURL%
 	echo.
 	if not exist "batch encoder %UpdateVersion%%append%-u.bat" (
@@ -158,7 +161,7 @@ if defined par_updated-from (
 	echo.
 	echo You can read the full changelog at: https://github.com/Adam-Kay/Batch-Encoder/releases
 	echo.
-	echo The program will now clean up and restart.
+	echo %icongray% i %formatend% The program will now clean up and restart.
 	call:GrayPause
 	del "%updateFileName%"
 	if /i "%par_silent%"=="true" (
@@ -347,7 +350,8 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	
 :ErrorLine
 	rem echo [4;31m                                                            %formatend%
-	echo %textred%************************************************************%formatend%
+	echo [91m____________________________________________________________%formatend%
+	rem echo [91m************************************************************%formatend%
 	rem echo [7;31m ********************************************************** %formatend%
 	goto:eof
 
