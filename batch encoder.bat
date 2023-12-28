@@ -278,10 +278,6 @@ if defined par_updated-from (
 		set /a crfval=10+^(%quality_choice%*3^)
 		set "quality_arg=-crf !crfval!"
 	)
-	
-	echo S %speed_arg%
-	echo Q %quality_arg%
-	pause
 
 :Conversion
 	if /i not "%par_verbose%"=="true" (set "quietargs=-v quiet -stats ")
@@ -332,7 +328,7 @@ if defined par_updated-from (
 				rem Move cursor 3 lines up
 				echo [3A
 			
-				"%LOCATION%" %quietargs% -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
+				"%LOCATION%" %quietargs% -i "%CD%\!INPUTFILE!" -map 0 %quality_arg% %speed_arg% "%CD%\!OUTPUTFILE!"
 				
 				echo.
 				echo.
@@ -366,7 +362,7 @@ if defined par_updated-from (
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
 				
-				REM delete to recycle bin
+				::delete to recycle bin
 				powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
 			)
 		)
