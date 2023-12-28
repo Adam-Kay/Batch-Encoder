@@ -197,6 +197,7 @@ if defined par_updated-from (
 	)
 
 :EncodingOptSelect
+	if /i "%par_silent%"=="true" (goto AdvancedEncodeSpeed)
 	call:ClearAndTitle
 	rem Remove in future release:
 	if "%CurrentVersion%"=="v1.7.0" (echo [100m NEW^^! %formatend%) 
@@ -215,50 +216,77 @@ if defined par_updated-from (
 	set "speeds[1]=ultrafast" & set "speeds[2]=superfast" & set "speeds[3]=veryfast" & set "speeds[4]=faster" & set "speeds[5]=fast"
 	set "speeds[6]=medium" & set "speeds[7]=slow" & set "speeds[8]=slower" & set "speeds[9]=veryslow" & set "speeds[d]=medium"
 	
-	echo [100m Speed %formatend%
-	echo.
-	echo Please enter a value between 1 and 9, where 1 is the fastest speed and 9 is the slowest - or enter [%textcyan%d%formatend%] for default ^(6^).
-	echo.
-	echo  Faster Speed		    		    Slower Speed
-	echo  Larger Filesize		   	Smaller Filesize
-	echo 	[90m^|					^|[0m
-	echo 	[90m+----+----+----+----+----+----+----+----+[0m
-	echo 	1    2    3    4    5    6    7    8    9
-	echo 				 [90m^|[0m
-	echo 			      Default
-	echo.
+	if /i "%par_silent%"=="true" (
+		if defined par_speed (
+			set "speed_inp=%par_speed%"
+		) else ( 
+			goto AdvancedEncodeQuality
+		)
+	) else (	
+		echo [100m Speed %formatend%
+		echo.
+		echo Please enter a value between 1 and 9, where 1 is the fastest speed and 9 is the slowest - or enter [%textcyan%d%formatend%] for default ^(6^).
+		echo.
+		echo  Faster Speed		    		    Slower Speed
+		echo  Larger Filesize		   	Smaller Filesize
+		echo 	[90m^|					^|[0m
+		echo 	[90m+----+----+----+----+----+----+----+----+[0m
+		echo 	1    2    3    4    5    6    7    8    9
+		echo 				 [90m^|[0m
+		echo 			      Default
+		echo.
+		
+		set /p "speed_inp=Speed: "
+	)
 	
-	set /p "speed_inp=Speed: "
 	set "speed_choice=!speeds[%speed_inp%]!
-	if not defined speed_choice (goto AdvancedEncodeSpeed)
+	if not defined speed_choice (
+		if /i "%par_silent%"=="true" (
+			(echo Error: --speed value '%par_speed%' is invalid. Should be an integer between 1 and 9. & exit /b 1)
+		) else (
+			goto AdvancedEncodeSpeed
+		)
+	)
 
 :AdvancedEncodeQuality
 	call:ClearAndTitle "Advanced Encoding"
-	echo [100m Quality %formatend%
-	echo.
-	echo Please select a value between 1 and 9, where 1 is the highest quality and 9 is the lowest - or enter [%textcyan%d%formatend%] for default ^(4^).
-	echo.
-	echo  Higher Quality		    		   Lower Quality
-	echo  Larger Filesize		   	Smaller Filesize
-	echo 	[90m^|					^|[0m
-	echo 	[90m+----+----+----+----+----+----+----+----+[0m
-	echo 	1    2    3    4    5    6    7    8    9
-	echo 		       [90m^|[0m
-	echo 		    Default
-	echo.
+	if /i "%par_silent%"=="true" (
+		if defined par_quality (
+			set "quality_inp=%par_quality%"
+		) else ( 
+			goto Before_Convert
+		)
+	) else (
+		echo [100m Quality %formatend%
+		echo.
+		echo Please select a value between 1 and 9, where 1 is the highest quality and 9 is the lowest - or enter [%textcyan%d%formatend%] for default ^(4^).
+		echo.
+		echo  Higher Quality		    		   Lower Quality
+		echo  Larger Filesize		   	Smaller Filesize
+		echo 	[90m^|					^|[0m
+		echo 	[90m+----+----+----+----+----+----+----+----+[0m
+		echo 	1    2    3    4    5    6    7    8    9
+		echo 		       [90m^|[0m
+		echo 		    Default
+		echo.
 
-	set /p "quality_inp=Quality: "
+		set /p "quality_inp=Quality: "
+	)
+	
 	if %quality_inp: =0% geq 1 (
 		if %quality_inp: =0% leq 9 (
 			set /a "quality_choice=%quality_inp%+0"
-			goto Before_Convert
 		)
 	)
-	if /i "%quality_input%"=="d" (
-		set "quality_choice=4"
-		goto Before_Convert
+	if /i "%quality_input%"=="d" (set "quality_choice=4")
+	
+	if not defined quality_choice (
+		if /i "%par_silent%"=="true" (
+			(echo Error: --quality value '%par_quality%' is invalid. Should be an integer between 1 and 9. & exit /b 1)
+		) else (
+			goto AdvancedEncodeQuality
+		)
 	)
-	goto AdvancedEncodeQuality
 	
 :Before_Convert
 	set "LOC_TEST=%LOCATION:\=%"
