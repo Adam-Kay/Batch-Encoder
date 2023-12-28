@@ -206,7 +206,7 @@ if defined par_updated-from (
 	echo [%textcyan%a%formatend%] Advanced encode - options to control quality and speed of output video.
 	echo.
 	set /p "encodeopt=Option: "
-	if /i "%encodeopt%"=="s" (goto Count)
+	if /i "%encodeopt%"=="s" (goto Before_Convert)
 	if /i "%encodeopt%"=="a" (goto AdvancedEncodeSpeed)
 	goto EncodingOptSelect
 	
@@ -251,27 +251,37 @@ if defined par_updated-from (
 	if %quality_inp: =0% geq 1 (
 		if %quality_inp: =0% leq 9 (
 			set /a "quality_choice=%quality_inp%+0"
-			goto Count
+			goto Before_Convert
 		)
 	)
 	if /i "%quality_input%"=="d" (
 		set "quality_choice=4"
-		goto Count
+		goto Before_Convert
 	)
 	goto AdvancedEncodeQuality
 	
-:Count
+:Before_Convert
 	set "LOC_TEST=%LOCATION:\=%"
 	set "LOC_TEST=%LOC_TEST:/=%"
 	if "%LOC_TEST%"=="%LOCATION%" (set "pwsh_prefix=.\")
 	set "LOCATION_pwsh=%pwsh_prefix%%LOCATION:"=%
+	
 	set /a "COUNTER=-1"
 	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
-	
 	set /a "COUNTER=0"
 	set /a "VALIDCOUNTER=0"
 	set "INPUTFILE="
+	
+	if defined speed_choice (set "speed_arg=-preset %speed_choice%")
+	if defined quality_choice (
+		set /a crfval=10+^(%quality_choice%*3^)
+		set "quality_arg=-crf !crfval!"
+	)
+	
+	echo S %speed_arg%
+	echo Q %quality_arg%
+	pause
 
 :Conversion
 	if /i not "%par_verbose%"=="true" (set "quietargs=-v quiet -stats ")
