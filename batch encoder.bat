@@ -49,10 +49,37 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 if "%par_debug%"=="true" (pause)
 cls
 
+if defined par_help (
+	::list help for args, then exit
+	echo %formatend%Help for Batch Encoder %CurrentVersion%
+	echo Program usage:
+	echo.
+	echo "batch encoder v%textgray%x%formatend%.%textgray%x%formatend%.%textgray%x%formatend%.bat"
+	echo "batch encoder v%textgray%x%formatend%.%textgray%x%formatend%.%textgray%x%formatend%.bat" [options]
+	echo "batch encoder v%textgray%x%formatend%.%textgray%x%formatend%.%textgray%x%formatend%.bat" --silent --update ^(true^|false^|force^) --ffmpegloc ^<path^> [options]
+	echo.
+	echo %textcyan%--silent%formatend%			Allows the program to operate without any prompts. 
+	echo 				Requires --ffmpegloc and --update to be set.
+	echo.
+	echo %textcyan%--update%formatend% ^(true^|false^|force^)	Sets if the program should check for an update or not. 
+	echo					'force' will update regardless of version.
+	echo.
+	echo %textcyan%--ffmpegloc%formatend% ^<path^>		Sets the path of FFmpeg. Will accept a relative path.
+	echo.
+	echo %textcyan%--speed%formatend% ^(1-9^)			Sets speed value. 1 is slowest, 9 is fastest. See prompt for more info.
+	echo 				Currently only works when --silent flag is used.
+	echo.
+	echo %textcyan%--quality%formatend% ^(1-9^)			Sets quality value. 1 is lowest, 9 is highest. See prompt for more info.
+	echo 				Currently only works when --silent flag is used.
+	echo.
+	
+	goto EndPause
+)
+
 if defined par_updated-from (
 	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
 	timeout /nobreak 2 > nul
-	rem ↓ special format to remove " from string
+	::↓ special format to remove " from string
 	del "%par_updated-from:"=%"
 )
 
@@ -175,7 +202,7 @@ if defined par_updated-from (
 :FFMPEGLocation
 	call:ClearAndTitle
 	if /i "%par_silent%"=="true" (
-		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc [path] not provided. & exit /b 1)
+		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc ^<path^> not provided. & exit /b 1)
 		set "par_ffmpegloc=%par_ffmpegloc:"=%"
 		if not exist "%par_ffmpegloc%" (
 			echo Error: --ffmpegloc path "%par_ffmpegloc%" provided does not exist.
