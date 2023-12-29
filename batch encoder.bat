@@ -116,7 +116,7 @@ if defined par_updated-from (
 	if exist "batch encoder %UpdateVersion%%append%-u.bat" (del "batch encoder %UpdateVersion%%append%-u.bat")
 	echo %icongray% i %formatend% Downloading information...
 	set "updateFileName=batch_update.json"
-	curl --silent -L -H "Accept: application/vnd.github+json" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
+	curl --silent -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version:2022-11-28" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	if not exist "%updateFileName%" (goto AutoUpdateError)
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
