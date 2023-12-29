@@ -66,6 +66,8 @@ if defined par_help (
 	echo.
 	echo %textcyan%--ffmpegloc%formatend% ^<path^>		Sets the path of FFmpeg. Will accept a relative path.
 	echo.
+	echo %textcyan%--verbose%formatend%			Restores FFmpeg display behavior to pre-v1.6.4 ^(expanded details^).
+	echo.
 	echo %textcyan%--speed%formatend% ^(1-9^)			Sets speed value. 1 is slowest, 9 is fastest. See prompt for more info.
 	echo 				Currently only works when --silent flag is used.
 	echo.
