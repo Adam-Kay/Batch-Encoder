@@ -213,8 +213,8 @@ if defined par_updated-from (
 	
 :AdvancedEncodeSpeed
 	call:ClearAndTitle "Advanced Encoding"
-	set "speeds[1]=ultrafast" & set "speeds[2]=superfast" & set "speeds[3]=veryfast" & set "speeds[4]=faster" & set "speeds[5]=fast"
-	set "speeds[6]=medium" & set "speeds[7]=slow" & set "speeds[8]=slower" & set "speeds[9]=veryslow" & set "speeds[d]=medium"
+	set "speeds[9]=ultrafast" & set "speeds[8]=superfast" & set "speeds[7]=veryfast" & set "speeds[6]=faster" & set "speeds[5]=fast"
+	set "speeds[4]=medium" & set "speeds[3]=slow" & set "speeds[2]=slower" & set "speeds[1]=veryslow" & set "speeds[d]=medium"
 	
 	if /i "%par_silent%"=="true" (
 		if defined par_speed (
@@ -225,15 +225,16 @@ if defined par_updated-from (
 	) else (	
 		echo [100m Speed %formatend%
 		echo.
-		echo Please enter a value between 1 and 9, where 1 is the fastest speed and 9 is the slowest - or enter [%textcyan%d%formatend%] for default ^(6^).
+		echo Please enter a value between 1 and 9, where 1 is the slowest speed and 9 is the fastest
+		echo - or enter [%textcyan%d%formatend%] for default ^(4^).
 		echo.
-		echo  Faster Speed		    		    Slower Speed
-		echo  Larger Filesize		   	Smaller Filesize
+		echo  Slower Speed		    		    Faster Speed
+		echo  Smaller Filesize		   	 Larger Filesize
 		echo 	[90m^|					^|[0m
 		echo 	[90m+----+----+----+----+----+----+----+----+[0m
 		echo 	1    2    3    4    5    6    7    8    9
-		echo 				 [90m^|[0m
-		echo 			      Default
+		echo 		       [90m^|[0m
+		echo			    Default
 		echo.
 		
 		set /p "speed_inp=Speed: "
@@ -259,15 +260,16 @@ if defined par_updated-from (
 	) else (
 		echo [100m Quality %formatend%
 		echo.
-		echo Please select a value between 1 and 9, where 1 is the highest quality and 9 is the lowest - or enter [%textcyan%d%formatend%] for default ^(4^).
+		echo Please select a value between 1 and 9, where 1 is the lowest quality and 9 is the highest
+		echo - or enter [%textcyan%d%formatend%] for default ^(6^).
 		echo.
-		echo  Higher Quality		    		   Lower Quality
-		echo  Larger Filesize		   	Smaller Filesize
+		echo  Lower Quality		    		  Higher Quality
+		echo  Smaller Filesize		   	 Larger Filesize
 		echo 	[90m^|					^|[0m
 		echo 	[90m+----+----+----+----+----+----+----+----+[0m
 		echo 	1    2    3    4    5    6    7    8    9
-		echo 		       [90m^|[0m
-		echo 		    Default
+		echo 				 [90m^|[0m
+		echo 			      Default
 		echo.
 
 		set /p "quality_inp=Quality: "
@@ -307,7 +309,7 @@ if defined par_updated-from (
 		set "speed_text=Speed:%speed_inp%!spacer!"
 	)
 	if defined quality_choice (
-		set /a crfval=10+^(%quality_choice%*3^)
+		set /a crfval=40+^(%quality_choice%*-3^)
 		set "quality_arg=-crf !crfval!"
 		set "quality_text=Quality:%quality_choice%"
 	)
