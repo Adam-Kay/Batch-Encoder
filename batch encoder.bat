@@ -301,17 +301,22 @@ if defined par_updated-from (
 	set /a "VALIDCOUNTER=0"
 	set "INPUTFILE="
 	
-	if defined speed_choice (set "speed_arg=-preset %speed_choice%")
+	if defined speed_choice (
+		set "speed_arg=-preset %speed_choice%"
+		if defined quality_choice (set "spacer= ")
+		set "speed_text=Speed:%speed_inp%!spacer!"
+	)
 	if defined quality_choice (
 		set /a crfval=10+^(%quality_choice%*3^)
 		set "quality_arg=-crf !crfval!"
+		set "quality_text=Quality:%quality_choice%"
 	)
 
 :Conversion
 	if /i not "%par_verbose%"=="true" (set "quietargs=-v quiet -stats ")
 	for %%f in (.\*) do (
 	
-		call:ClearAndTitle
+		call:ClearAndTitle "%speed_text%%quality_text%"
 		
 		set "outputfiledupe=false"
 		set "INPUTFILE=%%f"
