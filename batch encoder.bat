@@ -11,6 +11,7 @@ set "iconred=[7;31m"
 set "textgray=[90m"
 set "textgreen=[32m"
 set "textred=[31m"
+set "textcyan=[36m"
 set "formatend=[0m"
 (set eline=^
 %=this line is empty=%
@@ -48,10 +49,39 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 if "%par_debug%"=="true" (pause)
 cls
 
+if defined par_help (
+	::list help for args, then exit
+	echo %formatend%Help for Batch Encoder %CurrentVersion%
+	echo Program usage:
+	echo.
+	echo "batch encoder v%textgray%x%formatend%.%textgray%x%formatend%.%textgray%x%formatend%.bat"
+	echo "batch encoder v%textgray%x%formatend%.%textgray%x%formatend%.%textgray%x%formatend%.bat" [options]
+	echo "batch encoder v%textgray%x%formatend%.%textgray%x%formatend%.%textgray%x%formatend%.bat" --silent --update ^(true^|false^|force^) --ffmpegloc ^<path^> [options]
+	echo.
+	echo %textcyan%--silent%formatend%			Allows the program to operate without any prompts. 
+	echo 				Requires --ffmpegloc and --update to be set.
+	echo.
+	echo %textcyan%--update%formatend% ^(true^|false^|force^)	Sets if the program should check for an update or not. 
+	echo					'force' will update regardless of version.
+	echo.
+	echo %textcyan%--ffmpegloc%formatend% ^<path^>		Sets the path of FFmpeg. Will accept a relative path.
+	echo.
+	echo %textcyan%--verbose%formatend%			Restores FFmpeg display behavior to pre-v1.6.4 ^(expanded details^).
+	echo.
+	echo %textcyan%--speed%formatend% ^(1-9^)			Sets speed value. 1 is slowest, 9 is fastest. See prompt for more info.
+	echo 				Currently only works when --silent flag is used.
+	echo.
+	echo %textcyan%--quality%formatend% ^(1-9^)			Sets quality value. 1 is lowest, 9 is highest. See prompt for more info.
+	echo 				Currently only works when --silent flag is used.
+	echo.
+	
+	goto EndPause
+)
+
 if defined par_updated-from (
 	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
 	timeout /nobreak 2 > nul
-	rem ↓ special format to remove " from string
+	::↓ special format to remove " from string
 	del "%par_updated-from:"=%"
 )
 
@@ -174,14 +204,14 @@ if defined par_updated-from (
 :FFMPEGLocation
 	call:ClearAndTitle
 	if /i "%par_silent%"=="true" (
-		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc [path] not provided. & exit /b 1)
+		if not defined par_ffmpegloc (echo Error: --silent switch used but --ffmpegloc ^<path^> not provided. & exit /b 1)
 		set "par_ffmpegloc=%par_ffmpegloc:"=%"
 		if not exist "%par_ffmpegloc%" (
 			echo Error: --ffmpegloc path "%par_ffmpegloc%" provided does not exist.
 			exit /b 1
 		) else (
 			set "LOCATION=%par_ffmpegloc%"
-			goto Count
+			goto EncodingOptSelect
 		)
 	)
 	set /p "LOCATION=%icongray% ? %formatend% Where is FFMPEG.exe located? (paste full path): "
@@ -195,24 +225,129 @@ if defined par_updated-from (
 		)
 	)
 
-:Count
+:EncodingOptSelect
+	if /i "%par_silent%"=="true" (goto AdvancedEncodeSpeed)
+	call:ClearAndTitle
+	rem Remove in future release:
+	if "%CurrentVersion%"=="v1.7.0" (echo [100m NEW^^! %formatend%) 
+	echo There are multiple encoding options available. If you are not sure which to choose, select 'Simple'.
+	echo.
+	echo [%textcyan%s%formatend%] Simple encode - default options, and the one used in previous versions.
+	echo [%textcyan%a%formatend%] Advanced encode - options to control quality and speed of output video.
+	echo.
+	set /p "encodeopt=Option: "
+	if /i "%encodeopt%"=="s" (goto Before_Convert)
+	if /i "%encodeopt%"=="a" (goto AdvancedEncodeSpeed)
+	goto EncodingOptSelect
+	
+:AdvancedEncodeSpeed
+	call:ClearAndTitle "Advanced Encoding"
+	set "speeds[9]=ultrafast" & set "speeds[8]=superfast" & set "speeds[7]=veryfast" & set "speeds[6]=faster" & set "speeds[5]=fast"
+	set "speeds[4]=medium" & set "speeds[3]=slow" & set "speeds[2]=slower" & set "speeds[1]=veryslow" & set "speeds[d]=medium"
+	
+	if /i "%par_silent%"=="true" (
+		if defined par_speed (
+			set "speed_inp=%par_speed%"
+		) else ( 
+			goto AdvancedEncodeQuality
+		)
+	) else (	
+		echo [100m Speed %formatend%
+		echo.
+		echo Please enter a value between 1 and 9, where 1 is the slowest speed and 9 is the fastest
+		echo - or enter [%textcyan%d%formatend%] for default ^(4^).
+		echo.
+		echo  Slower Speed		    		    Faster Speed
+		echo  Smaller Filesize		   	 Larger Filesize
+		echo 	[90m^|					^|[0m
+		echo 	[90m+----+----+----+----+----+----+----+----+[0m
+		echo 	1    2    3    4    5    6    7    8    9
+		echo 		       [90m^|[0m
+		echo			    Default
+		echo.
+		
+		set /p "speed_inp=Speed: "
+	)
+	
+	set "speed_choice=!speeds[%speed_inp%]!
+	if not defined speed_choice (
+		if /i "%par_silent%"=="true" (
+			(echo Error: --speed value '%par_speed%' is invalid. Should be an integer between 1 and 9. & exit /b 1)
+		) else (
+			goto AdvancedEncodeSpeed
+		)
+	)
+
+:AdvancedEncodeQuality
+	call:ClearAndTitle "Advanced Encoding"
+	if /i "%par_silent%"=="true" (
+		if defined par_quality (
+			set "quality_inp=%par_quality%"
+		) else ( 
+			goto Before_Convert
+		)
+	) else (
+		echo [100m Quality %formatend%
+		echo.
+		echo Please select a value between 1 and 9, where 1 is the lowest quality and 9 is the highest
+		echo - or enter [%textcyan%d%formatend%] for default ^(6^).
+		echo.
+		echo  Lower Quality		    		  Higher Quality
+		echo  Smaller Filesize		   	 Larger Filesize
+		echo 	[90m^|					^|[0m
+		echo 	[90m+----+----+----+----+----+----+----+----+[0m
+		echo 	1    2    3    4    5    6    7    8    9
+		echo 				 [90m^|[0m
+		echo 			      Default
+		echo.
+
+		set /p "quality_inp=Quality: "
+	)
+	
+	if %quality_inp: =0% geq 1 (
+		if %quality_inp: =0% leq 9 (
+			set /a "quality_choice=%quality_inp%+0"
+		)
+	)
+	if /i "%quality_input%"=="d" (set "quality_choice=4")
+	
+	if not defined quality_choice (
+		if /i "%par_silent%"=="true" (
+			(echo Error: --quality value '%par_quality%' is invalid. Should be an integer between 1 and 9. & exit /b 1)
+		) else (
+			goto AdvancedEncodeQuality
+		)
+	)
+	
+:Before_Convert
 	set "LOC_TEST=%LOCATION:\=%"
 	set "LOC_TEST=%LOC_TEST:/=%"
 	if "%LOC_TEST%"=="%LOCATION%" (set "pwsh_prefix=.\")
 	set "LOCATION_pwsh=%pwsh_prefix%%LOCATION:"=%
+	
 	set /a "COUNTER=-1"
 	for %%f in (.\*) do set /a "COUNTER+=1"
 	set "TOTAL=%COUNTER%"
-	
 	set /a "COUNTER=0"
 	set /a "VALIDCOUNTER=0"
 	set "INPUTFILE="
+	
+	if defined speed_choice (
+		set "speed_arg=-preset %speed_choice%"
+		if defined quality_choice (set "spacer= ")
+		set "speed_text=Speed:%speed_inp%!spacer!"
+	)
+	if defined quality_choice (
+		set /a crfval=40+^(%quality_choice%*-3^)
+		set "quality_arg=-crf !crfval!"
+		set "quality_text=Quality:%quality_choice%"
+	)
 
 :Conversion
 	if /i not "%par_verbose%"=="true" (set "quietargs=-v quiet -stats ")
 	for %%f in (.\*) do (
 	
-		call:ClearAndTitle
+		call:ClearAndTitle "%speed_text%%quality_text%"
 		
 		set "outputfiledupe=false"
 		set "INPUTFILE=%%f"
@@ -257,7 +392,7 @@ if defined par_updated-from (
 				rem Move cursor 3 lines up
 				echo [3A
 			
-				"%LOCATION%" %quietargs% -i "%CD%\!INPUTFILE!" -map 0 "%CD%\!OUTPUTFILE!"
+				"%LOCATION%" %quietargs% -i "%CD%\!INPUTFILE!" -map 0 %quality_arg% %speed_arg% "%CD%\!OUTPUTFILE!"
 				
 				echo.
 				echo.
@@ -291,7 +426,7 @@ if defined par_updated-from (
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
 				
-				REM delete to recycle bin
+				::delete to recycle bin
 				powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
 			)
 		)
@@ -357,6 +492,8 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 
 :ClearAndTitle
 	cls
-	echo [7m Batch Encoder %CurrentVersion% %formatend%
+	set "message=%~1"
+	if defined message (set "message=- %message% ")
+	echo [7m Batch Encoder %CurrentVersion% %message%%formatend%
 	echo.
 	goto:eof
