@@ -9,6 +9,9 @@ set "textgray=[90m"
 set "textgreen=[32m"
 set "textred=[31m"
 set "formatend=[0m"
+(set eline=^
+%=this line is empty=%
+)
 
 
 if /i "%1"=="--silent" (
@@ -63,16 +66,28 @@ if /i "%1"=="--silent" (
 	if not exist "%updateFileName%" (goto AutoUpdateError)
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
-	<%TEMP%\batch_update.tmp set /p "ver_entry="
-	set "ver=%ver_entry:~15,-2%"
+	<%TEMP%\batch_update.tmp set /p "entry_ver="
+	set "ver=%entry_ver:~15,-2%"
 	set "UpdateVersion=v%ver:~1%"
+	
+	>%TEMP%\batch_update.tmp findstr "body" %updateFileName%
+	<%TEMP%\batch_update.tmp set /p "entry_body="
+	set "changelog=%entry_body:~11,-1%"
+	set "changelog=%changelog:\n#=\n\r\n#%"
+	set "changelog=%changelog:#=[100;37m#%"
+	set "changelog=%changelog:\r=!formatend!\r%"
+	set "changelog=%changelog: `= [1m%"
+	set "changelog=%changelog:` =!formatend! %"
+	>%TEMP%\batch_update.tmp echo %changelog%
+	for %%? in (%TEMP%\batch_update.tmp) do (set /A strlength=%%~z? - 2)
+	if %strlength% gtr 1000 (set "changelog=%changelog:~0,1000%... %textgray%[More]%formatend%")
 	
 	set regex_command=powershell -Command "$x = Get-Content %updateFileName% -Raw; $k = $x | Select-String -Pattern '(?s)url(((?^^^!url).)*?)batch\.encoder'; $g = $k.Matches.Value | Select-String -Pattern '^""[^^^^"""]+?^""",'; $g.Matches.Value"
 	
-	FOR /F "tokens=*" %%g IN ('%regex_command%') do (SET API_link_entry=%%g)
-	set "UpdateAPIURL=%API_link_entry:~1,-2%"
+	FOR /F "tokens=*" %%g IN ('%regex_command%') do (SET entry_APILink=%%g)
+	set "UpdateAPIURL=%entry_APILink:~1,-2%"
 
-	for %%a in (ver_entry, API_link_entry, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
+	for %%a in (entry_ver, entry_APILink, UpdateVersion, UpdateAPIURL) do if not defined %%a goto AutoUpdateError
 	
 	echo.
 	echo %iconyellow% ^^! %formatend% Version found^^! ^(%textgreen%%UpdateVersion%^%formatend%)
@@ -92,10 +107,18 @@ if /i "%1"=="--silent" (
 		)
 	)
 	move /Y "batch encoder %UpdateVersion%%append%-u.bat" "batch encoder %UpdateVersion%%append%.bat" > nul
+	
+	echo %icongreen% i %formatend% Download complete. 
+	echo. & echo.
+	echo %changelog:\r\n=!eline!%%formatend%
+	echo.
+	echo You can read the full changelog at: https://github.com/Adam-Kay/Batch-Encoder/releases
+	echo.
+
 	if "%par_silent%"=="true" (
-		echo %icongreen% i %formatend% Download complete. The program will now clean up and exit.
+		echo The program will now clean up and exit.
 	) else (
-		echo %icongreen% i %formatend% Download complete. The program will now clean up and restart.
+		echo The program will now clean up and restart.
 	)
 	
 	call:GrayPause
@@ -115,7 +138,7 @@ if /i "%1"=="--silent" (
 	del "%updateFileName%"
 	echo.
 	echo.
-	echo %textred%************************************************************%formatend%
+	echo [91m____________________________________________________________%formatend%
 	echo.
 	echo There was a problem with the auto-updater. You can download the latest version of the program at: 
 	echo https://github.com/Adam-Kay/Batch-Encoder/releases
