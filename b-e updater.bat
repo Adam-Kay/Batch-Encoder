@@ -71,13 +71,17 @@ if /i "%1"=="--silent" (
 	set "UpdateVersion=v%ver:~1%"
 	
 	>%TEMP%\batch_update.tmp findstr "body" %updateFileName%
-	<%TEMP%\batch_update.tmp set /p "entry_body="
-	set "changelog=%entry_body:~11,-1%"
+	set "pwsh_replace=-replace '^!' -replace '^<\/\S*?^>', '#[FORMEND]#' -replace '^<\S*?^>', '#[FORM]#' -replace '^<', '(less)' -replace '^>', '(more)'"
+	for /F "tokens=*" %%g in ('powershell -Command "(Get-Content $env:TEMP\batch_update.tmp) !pwsh_replace! "') do (set entry_body=%%g)
+	set "changelog=%entry_body:~9,-1%"
+	set "changelog=%changelog:#[FORM]#=[1m%"
+	set "changelog=%changelog:#[FORMEND]#=!formatend!%"
 	set "changelog=%changelog:\n#=\n\r\n#%"
 	set "changelog=%changelog:#=[100;37m#%"
 	set "changelog=%changelog:\r=!formatend!\r%"
 	set "changelog=%changelog: `= [1m%"
 	set "changelog=%changelog:` =!formatend! %"
+
 	>%TEMP%\batch_update.tmp echo %changelog%
 	for %%? in (%TEMP%\batch_update.tmp) do (set /A strlength=%%~z? - 2)
 	if %strlength% gtr 1000 (set "changelog=%changelog:~0,1000%... %textgray%[More]%formatend%")
@@ -116,9 +120,9 @@ if /i "%1"=="--silent" (
 	echo.
 
 	if "%par_silent%"=="true" (
-		echo The program will now clean up and exit.
+		echo %icongray% i %formatend% The program will now clean up and exit.
 	) else (
-		echo The program will now clean up and restart.
+		echo %icongray% i %formatend% The program will now clean up and restart.
 	)
 	
 	call:GrayPause
