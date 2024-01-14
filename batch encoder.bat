@@ -314,7 +314,7 @@ if defined par_updated-from (
 			set /a "quality_choice=%quality_inp%+0"
 		)
 	)
-	if /i "%quality_input%"=="d" (set "quality_choice=4")
+	if /i "%quality_inp%"=="d" (set "quality_choice=6")
 	
 	if not defined quality_choice (
 		if /i "%par_silent%"=="true" (
