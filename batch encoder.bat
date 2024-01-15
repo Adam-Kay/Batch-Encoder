@@ -232,8 +232,6 @@ if defined par_updated-from (
 :EncodingOptSelect
 	if /i "%par_silent%"=="true" (goto AdvancedEncodeSpeed)
 	call:ClearAndTitle
-	rem Remove in future release:
-	if "%CurrentVersion%"=="v1.7.0" (echo [100m NEW^^! %formatend%) 
 	echo There are multiple encoding options available. If you are not sure which to choose, select 'Simple'.
 	echo.
 	echo [%textcyan%s%formatend%] Simple encode - default options, and the one used in previous versions.
