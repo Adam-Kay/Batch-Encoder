@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.7.1
+set CurrentVersion=v1.8.0
 cls
 
 set "icongray=[7;90m"
@@ -16,7 +16,6 @@ set "formatend=[0m"
 (set eline=^
 %=this line is empty=%
 )
-set "space= "
 
 
 for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
