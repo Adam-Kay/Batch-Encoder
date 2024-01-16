@@ -423,19 +423,30 @@ if defined par_updated-from (
 				)
 				echo - File lengths within range^^!
 				echo.
-				echo %icongreen% ^| %formatend% Safely proceeding with input file recycling...
-				timeout /nobreak /t 1 > nul
 				
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').CreationTime=((Get-Item '%CD%\!INPUTFILE!').CreationTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastWriteTime=((Get-Item '%CD%\!INPUTFILE!').LastWriteTime)"
 				powershell -Command "(Get-Item '%CD%\!OUTPUTFILE!').LastAccessTime=((Get-Item '%CD%\!INPUTFILE!').LastAccessTime)"
 				
-				::delete to recycle bin
-				powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
+				if "%par_waste%"=="keep" (
+					echo %icongreen% ^| %formatend% Retaining file...
+				) else (
+					if "%par_waste%"=="delete" (
+						echo %icongreen% ^| %formatend% Safely proceeding with input file deletion...
+						del "%CD%\!INPUTFILE!"
+					) else (
+						if not "%par_waste%"=="recycle" (echo --waste argument "%par_waste%" not recognized. Defaulting to "recycle". & echo.)
+						echo %icongreen% ^| %formatend% Safely proceeding with input file recycling...
+						::delete to recycle bin
+						powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
+					)
+				)
+				timeout /nobreak /t 1 > nul
 			)
 		)
 	)
-	
+
+:EndMsg
 call:ClearAndTitle
 set /a "SKIPCOUNTER=%TOTAL%-%VALIDCOUNTER%
 if %VALIDCOUNTER% gtr 0 (echo [42;97m Completed encoding %VALIDCOUNTER% files. %formatend%)
