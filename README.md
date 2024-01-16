@@ -14,6 +14,11 @@ A small personal project. A .bat file which uses FFmpeg to encode a folder full 
 If you are using the program already (version 1.4 and above), update using the built-in auto-updater.
 ### B) Downloader
 Grab the `b-e.updater.bat` file, either from Releases or by clicking [here](https://github.com/Adam-Kay/Batch-Encoder/releases/latest/download/b-e.updater.bat) to download directly. Place it in the desired folder and run it, and it will download the latest version of the program, and remove your old version if you have one.
+
+May alternatively be downloaded in a terminal with the following command:
+  ```pwsh
+  curl -L -o updater.bat "https://github.com/Adam-Kay/Batch-Encoder/releases/latest/download/b-e.updater.bat"
+  ```
 ### C) Manual Download
 Download the <code>batch.encoder.v`x`.`x`.`x`.bat</code> file from Releases. Place it in the desired folder, delete any older versions you have, and run.
 <br></br>
