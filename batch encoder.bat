@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.7.1
+set CurrentVersion=v1.7.2
 cls
 
 set "icongray=[7;90m"
@@ -399,8 +399,7 @@ if defined par_updated-from (
 			
 				"%LOCATION%" %quietargs% -i "%CD%\!INPUTFILE!" -map 0 %quality_arg% %speed_arg% "%CD%\!OUTPUTFILE!"
 				
-				echo.
-				echo.
+				echo. & echo.
 				echo Performing file checks:
 				echo ***********************
 				echo.
@@ -445,7 +444,7 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 
 :EndPause
 	call:GrayPause
-	(goto) 2>nul || exit /b 0
+	exit /b 0
 	
 :CritError
 	timeout /t 1 > nul
@@ -455,8 +454,8 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	echo A critical error occurred. The latest file has not been modified.
 	set errmsg=%~1
 	if defined errmsg (echo Error message provided: %errmsg%)
-	if /i "%par_silent%"=="true" (exit /b 3)
-	goto EndPause
+	call:GrayPause
+	(goto) 2>nul || exit /b 3
 	
 :AutoUpdateError
 	del "%updateFileName%"
