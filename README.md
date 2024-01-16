@@ -11,7 +11,7 @@ A small personal project. A .bat file which uses FFmpeg to encode a folder full 
 
 ## How to download/update:
 ### A) Auto-Updater
-If you are using the program already (version 1.4 and above), update using the built-in auto-updater.
+If you are using the program already (version 1.4 and above), update using the built-in auto-updater[^1].
 ### B) Downloader
 Grab the `b-e.updater.bat` file, either from Releases or by clicking [here](https://github.com/Adam-Kay/Batch-Encoder/releases/latest/download/b-e.updater.bat) to download directly. Place it in the desired folder and run it, and it will download the latest version of the program, and remove your old version if you have one.
 
@@ -27,6 +27,9 @@ Download the <code>batch.encoder.v`x`.`x`.`x`.bat</code> file from Releases. Pla
 1. Place into a folder with video files.
 2. Run <code>batch.encoder.v`x`.`x`.`x`.bat</code>.
 3. Follow the steps listed on-screen.
+
+<br></br>
+[^1]: Versions prior to v1.6.3 have a known issue of struggling to update on corporate networks. This is resolved in later versions, but in these cases, the only options are to continue re-attempting until it works, or using the latest updater as outlined in [B](https://github.com/Adam-Kay/Batch-Encoder/tree/main?tab=readme-ov-file#b-downloader).
 
 [release-img]: https://img.shields.io/github/release/Adam-Kay/Batch-Encoder.svg?style=for-the-badge&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAQAAADlauupAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAACYktHRAAAqo0jMgAAAAlwSFlzAAAAYAAAAGAA8GtCzwAAAAd0SU1FB+cMHBQVKAGFwf4AAAFlSURBVDjLxZM/S8NQFMXvI0WSTsVdBaeC2eLXcNJ8Fwe3Lk4VS4NDP0KhgzSL/6BbP0CcBJcS/yxdWooBc38OiU3Tpq6e6b137zncdzhXZA3o8THa68HLCywW6HwOUYS229BsLvuwbfC8gki9nhH/wvc3dDrQaKAPD5AkOdlxYDQqN8cxencHYQiTSbk2m/2ecoGbm6L48QGnp2BZ5a+dnEAcr88kqOtCmi7Jur8vFQDHQR8fNwW4vl7e1PdlC2A4rHKlJjKdCv2+mOlUzGAgWxFFwmJRejKvr/LvMHB5KRwero9mzPl5tReWJRIEwu6umPFYqgMzHG41U32/MP3iokLg6Qkcp5p8cACfn1nf1xe6t1ch8P6eBcmY1bHRs7OCDNBq5cXNeBZCYYje38PbW7l2e4vWarlAkmSL0WhAt1uksgppCldX6M7OiqueB7Zd3I+OsnRGETqfZ+v8/AxBgLruui8/vtYVt8juXQkAAAAASUVORK5CYII=
 [release-url]: https://github.com/Adam-Kay/Batch-Encoder/releases
