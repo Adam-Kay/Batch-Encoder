@@ -74,6 +74,9 @@ if defined par_help (
 	echo %textcyan%--quality%formatend% ^(1-9^)			Sets quality value. 1 is lowest, 9 is highest. See prompt for more info.
 	echo 				Currently only works when --silent flag is used.
 	echo.
+	echo %textcyan%--waste%formatend% ^(keep^|recycle^|delete^)	Controls what happens with old files. 'keep' will retain, 
+	echo 				'recycle' will send to bin, and 'delete' will permanently remove the file.
+	echo.
 	
 	goto EndPause
 )
