@@ -82,7 +82,7 @@ if defined par_updated-from (
 	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
 	timeout /nobreak 2 > nul
 	::↓ special format to remove " from string
-	del "%par_updated-from:"=%"
+	if exist "%par_updated-from:"=%" (del "%par_updated-from:"=%")
 )
 
 
