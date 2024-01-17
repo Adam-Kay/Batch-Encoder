@@ -46,10 +46,15 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 	)
 	
 if not defined par_selfwrapped (
-	cmd /c "%~f0" %* --selfwrapped && (echo !errorlevel!) || (set "wraperror=true")
-	rem echo EXITED WRAP ^(error code !errorlevel!, wrap error !wraperror!^)
-	if "!wraperror!"=="true" (call:CritError "Wrapper critically exited with error code !errorlevel!.")
-	echo !errorlevel!
+	cmd /c "%~f0" %* --selfwrapped || (set "wraperror=true")
+	if "!wraperror!"=="true" (
+		if "!errorlevel:~0,3!"=="101" (
+			::if errorlevel starts with 101, it's already been handled
+			set "errorlevel=!errorlevel:~3!
+		) else (
+			call:CritError "Wrapper critically exited with error code !errorlevel!."
+		)
+	)
 	exit /b !errorlevel!
 )
 
@@ -134,8 +139,6 @@ if defined par_updated-from (
 	set "ver=%entry_ver:~15,-2%"
 	set "UpdateVersion=v%ver:~1%"
 	
-	pause
-	
 	>%TEMP%\batch_update.tmp findstr "body" %updateFileName%
 	set "pwsh_replace=-replace '^!' -replace '^<\/\S*?^>', '#[FORMEND]#' -replace '^<\S*?^>', '#[FORM]#' -replace '^<', '(less)' -replace '^>', '(more)'"
 	for /F "tokens=*" %%g in ('powershell -Command "(Get-Content $env:TEMP\batch_update.tmp) !pwsh_replace! "') do (set entry_body=%%g)
@@ -168,7 +171,7 @@ if defined par_updated-from (
 			echo.
 			echo The program will now restart.
 			call:GrayPause
-			del "%updateFileName%"
+			if exist "%updateFileName%" (del "%updateFileName%")
 			if /i "%par_silent%"=="true" (
 				(goto) 2>nul & "%~f0" %* --update false
 			) else (
@@ -210,7 +213,7 @@ if defined par_updated-from (
 	echo.
 	echo %icongray% i %formatend% The program will now clean up and restart.
 	call:GrayPause
-	del "%updateFileName%"
+	if exist "%updateFileName%" (del "%updateFileName%")
 	if /i "%par_silent%"=="true" (
 		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" %* --update false
 	) else (
@@ -362,7 +365,7 @@ if defined par_updated-from (
 
 :Conversion
 	if /i not "%par_verbose%"=="true" (set "quietargs=-v quiet -stats ")
-	for %%f in (.\*) do (
+	for %%f in (.\*) do 
 	
 		call:ClearAndTitle "%speed_text%%quality_text%"
 		
@@ -445,12 +448,16 @@ if defined par_updated-from (
 				) else (
 					if "%par_waste%"=="delete" (
 						echo %icongreen% ^| %formatend% Safely proceeding with input file deletion...
-						del "%CD%\!INPUTFILE!"
+						if exist "!INPUTFILE!" (del "%CD%\!INPUTFILE!")
 					) else (
-						if not "%par_waste%"=="recycle" (echo --waste argument "%par_waste%" not recognized. Defaulting to "recycle". & echo.)
+						if not "%par_waste%"=="recycle" (
+							if defined par_waste (echo --waste argument "%par_waste%" not recognized. Defaulting to "recycle". & echo.)
+						)
 						echo %icongreen% ^| %formatend% Safely proceeding with input file recycling...
-						::delete to recycle bin
-						powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
+						if exist "!INPUTFILE!" (
+							::delete to recycle bin
+							powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
+						)
 					)
 				)
 				timeout /nobreak /t 1 > nul
@@ -478,20 +485,27 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	set errmsg=%~1
 	if defined errmsg (echo Error message provided: %errmsg%)
 	call:GrayPause
-	(goto) 2>nul || exit /b 3
+	call:CtrlExit 3
 	
 :AutoUpdateError
-	del "%updateFileName%"
+	if exist "%updateFileName%" (del "%updateFileName%")
 	echo.
 	call:ErrorLine
 	echo.
 	echo There was a problem with the auto-updater. You can download the latest version of the program at: 
 	echo https://github.com/Adam-Kay/Batch-Encoder/releases
 	echo.
-	if /i "%par_silent%"=="true" (exit /b 2)
+	if /i "%par_silent%"=="true" (call:CtrlExit 2)
 	echo The program will now restart.
 	call:GrayPause
 	(goto) 2>nul & "%~f0"
+	
+:CtrlExit
+	if defined par_selfwrapped (
+		exit 101%~1
+	)
+	:: go one level up (out of subroutine), then exit
+	(goto) 2>nul || exit /b %~1
 	
 :GrayPause
 	echo %textgray%
