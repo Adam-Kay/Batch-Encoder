@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.7.2
+set CurrentVersion=v1.7.3
 cls
 
 set "icongray=[7;90m"
@@ -17,7 +17,6 @@ set "formatend=[0m"
 %=this line is empty=%
 )
 set "space= "
-
 
 for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 	
@@ -45,6 +44,14 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 		set "par_!FLAG!=true"
 		if "%par_debug%"=="true" (echo %iconyellow%par_!FLAG!=TRUE%formatend%)
 	)
+	
+if not defined par_selfwrapped (
+	cmd /c "%~f0" %* --selfwrapped && (echo !errorlevel!) || (set "wraperror=true")
+	rem echo EXITED WRAP ^(error code !errorlevel!, wrap error !wraperror!^)
+	if "!wraperror!"=="true" (call:CritError "Wrapper critically exited with error code !errorlevel!.")
+	echo !errorlevel!
+	exit /b !errorlevel!
+)
 
 if "%par_debug%"=="true" (pause)
 cls
@@ -94,7 +101,7 @@ if defined par_updated-from (
 	if "%par_silent%"=="true" (goto AskUpdate)
 	echo %icongray% i %formatend% This program will aim to encode all .mp4 files in the folder it's placed in and recycle the originals.
 	set /p "startconfirmation=Do you want to proceed? %textgray%[Y/N]%formatend%: "
-	if /i "%startconfirmation%"=="n" exit
+	if /i "%startconfirmation%"=="n" (goto EndPause)
 	if /i "%startconfirmation%"=="y" (goto AskUpdate)
 	goto AskProceed
 
@@ -119,13 +126,15 @@ if defined par_updated-from (
 	if exist "batch encoder %UpdateVersion%%append%-u.bat" (del "batch encoder %UpdateVersion%%append%-u.bat")
 	echo %icongray% i %formatend% Downloading information...
 	set "updateFileName=batch_update.json"
-	curl --silent -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version:2022-11-28" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
+	rem curl --silent -L -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version:2022-11-28" -o %updateFileName% https://api.github.com/repos/Adam-Kay/Batch-Encoder/releases/latest
 	if not exist "%updateFileName%" (goto AutoUpdateError)
 	
 	>%TEMP%\batch_update.tmp findstr "tag_name" %updateFileName%
 	<%TEMP%\batch_update.tmp set /p "entry_ver="
 	set "ver=%entry_ver:~15,-2%"
 	set "UpdateVersion=v%ver:~1%"
+	
+	pause
 	
 	>%TEMP%\batch_update.tmp findstr "body" %updateFileName%
 	set "pwsh_replace=-replace '^!' -replace '^<\/\S*?^>', '#[FORMEND]#' -replace '^<\S*?^>', '#[FORM]#' -replace '^<', '(less)' -replace '^>', '(more)'"
