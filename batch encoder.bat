@@ -128,7 +128,7 @@ if defined par_updated-from (
 	set "UpdateVersion=v%ver:~1%"
 	
 	>%TEMP%\batch_update.tmp findstr "body" %updateFileName%
-	set "pwsh_replace=-replace '^!' -replace '^<\/\S*?^>', '#[FORMEND]#' -replace '^<\S*?^>', '#[FORM]#' -replace '^<', '(less)' -replace '^>', '(more)'"
+	set "pwsh_replace=-replace '^!' -replace '^<\/\S*?^>', '#[FORMEND]#' -replace '^<\S*?^>', '#[FORM]#' -replace '^<', '(less)' -replace '^>', '(more)' -replace '\^|', '/'"
 	for /F "tokens=*" %%g in ('powershell -Command "(Get-Content $env:TEMP\batch_update.tmp) !pwsh_replace! "') do (set entry_body=%%g)
 	set "changelog=%entry_body:~9,-1%"
 	set "changelog=%changelog:#[FORM]#=[1m%"
@@ -461,7 +461,6 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	exit /b 0
 	
 :CritError
-	timeout /t 1 > nul
 	echo.
 	call:ErrorLine
 	echo.
