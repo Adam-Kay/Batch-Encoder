@@ -25,7 +25,7 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 	set "FLAG=0"
 	for %%G in (%*) DO (
 		set ARG=%%G
-		rem if FLAG, record the flag name
+		:: if FLAG, record the flag name
 		echo !ARG! | findstr "\--" > nul && (
 			if not ["!FLAG!"]==["0"] ( rem Check if FLAG is set - if it is, then previous was a boolean.
 				set "par_!FLAG!=true"
