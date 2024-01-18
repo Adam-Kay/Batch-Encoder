@@ -18,9 +18,12 @@ set "formatend=[0m"
 )
 set "space= "
 
+set "starttime=%TIME%"
+
 for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 	
 :ArgParser
+	set "allargs=%*"
 	set "FLAG=0"
 	for %%G in (%*) DO (
 		set ARG=%%G
@@ -44,17 +47,37 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 		set "par_!FLAG!=true"
 		if "%par_debug%"=="true" (echo %iconyellow%par_!FLAG!=TRUE%formatend%)
 	)
-	
-if not defined par_selfwrapped (
-	cmd /c "%~f0" %* --selfwrapped || (set "wraperror=true")
+
+if not "%par_selfwrapped%"=="true" (
+	cmd /c ""%~f0" %* --selfwrapped" || (set "wraperror=true")
+	echo UNWRAPPED ^(!errorlevel!^)
+	echo Returning to instance %starttime%
+	echo Currentargs: %*
+	echo Currentargs2: !allargs!
 	if "!wraperror!"=="true" (
+		<%TEMP%\batch_update.tmp set /p "newfilename="
+		echo newfilename: !newfilename!
+		pause
+		rem If errorlevel is negative, it's a restart command:
+		rem Standard restart
+		if "!errorlevel!"=="-1" (
+			echo ERROR MINUS 1 - RESTART REQUESTED
+			pause
+			"%~f0"
+		)
+		rem Restart after update
+		if "!errorlevel!"=="-2" (!newfilename! --updated-from "%~f0")
+		rem Restart after update (with silent, so passing previous args)
+		rem if "!errorlevel!"=="-3" ((goto) 2>nul & !newfilename! --updated-from "%~f0" %* --update false --selfwrapped false)
+		
+		rem If errorlevel starts with 101, it's already been handled
 		if "!errorlevel:~0,3!"=="101" (
-			::if errorlevel starts with 101, it's already been handled
-			set "errorlevel=!errorlevel:~3!
+			set "errorlevel=!errorlevel:~3!"
 		) else (
 			call:CritError "Wrapper critically exited with error code !errorlevel!."
 		)
 	)
+	echo about to exit with code !errorlevel!
 	exit /b !errorlevel!
 )
 
@@ -62,7 +85,7 @@ if "%par_debug%"=="true" (pause)
 cls
 
 if defined par_help (
-	::list help for args, then exit
+	rem list help for args, then exit
 	echo %formatend%Help for Batch Encoder %CurrentVersion%
 	echo Program usage:
 	echo.
@@ -96,7 +119,7 @@ if defined par_help (
 if defined par_updated-from (
 	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
 	timeout /nobreak 2 > nul
-	::↓ special format to remove " from string
+	rem ↓ special format to remove " from string
 	if exist "%par_updated-from:"=%" (del "%par_updated-from:"=%")
 )
 
@@ -175,7 +198,7 @@ if defined par_updated-from (
 			if /i "%par_silent%"=="true" (
 				(goto) 2>nul & "%~f0" %* --update false
 			) else (
-				(goto) 2>nul & "%~f0"
+				exit -1
 			)
 		)
 	)
@@ -186,7 +209,7 @@ if defined par_updated-from (
 		echo %iconyellow% ^^! %formatend% Differing version found^^! ^(%textred%%CurrentVersion%%formatend% -^> %textgreen%%UpdateVersion%%formatend%^)
 		echo Proceeding with update in 5 seconds; close window to cancel.
 	)
-	:: ... anim
+	rem ... anim
 	echo. & echo [s
 	for /l %%x in (1, 1, 6) do (
 		timeout /nobreak /t 1 > nul
@@ -212,12 +235,17 @@ if defined par_updated-from (
 	echo You can read the full changelog at: https://github.com/Adam-Kay/Batch-Encoder/releases
 	echo.
 	echo %icongray% i %formatend% The program will now clean up and restart.
+	pause rem REMOVE
 	call:GrayPause
 	if exist "%updateFileName%" (del "%updateFileName%")
+	echo "batch encoder %UpdateVersion%%append%.bat" > %TEMP%\batch_update.tmp
 	if /i "%par_silent%"=="true" (
-		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" %* --update false
+		exit -3
+		rem (goto) 2>nul & (goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" %* --update false --selfwrapped false
+		rem cmd /c ""batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" %* --update false --selfwrapped false" & exit
 	) else (
-		(goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
+		exit -2
+		rem "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
 	)
 	
 
@@ -392,14 +420,14 @@ if defined par_updated-from (
 						set "OUTPUTFILE=!INPUTFILE:~0,-8!.ENC.mp4"
 					) else (
 						set "outputfiledupe=true"
-						set "OUTPUTFILE=!INPUTFILE:~0,-8!_!date!-!time::=-!.ENC.mp4"
+						set "OUTPUTFILE=!INPUTFILE:~0,-8!_!date!-!timerem =-!.ENC.mp4"
 					)
 				) else (
 					if not exist "!INPUTFILE:~0,-4!.ENC.mp4" (
 						set "OUTPUTFILE=!INPUTFILE:~0,-4!.ENC.mp4"
 					) else (
 						set "outputfiledupe=true"
-						set "OUTPUTFILE=!INPUTFILE:~0,-4!_!date!-!time::=-!.ENC.mp4"
+						set "OUTPUTFILE=!INPUTFILE:~0,-4!_!date!-!timerem =-!.ENC.mp4"
 					)
 				)
 				
@@ -429,7 +457,7 @@ if defined par_updated-from (
 					) do (set LEN_INP=%%g)
 				for /F "tokens=*" %%g in ( 'powershell -Command "(^& '%LOCATION_pwsh%' -i '!OUTPUTFILE!' 2>&1 | select-String 'Duration: (.*), s').Matches.Groups[1].Value"'
 					) do (set LEN_OUT=%%g)
-				for /F "tokens=*" %%g in ( 'powershell -Command "[Math]::Abs(((Get-Date !LEN_INP!) - (Get-Date !LEN_OUT!)).TotalSeconds)"'
+				for /F "tokens=*" %%g in ( 'powershell -Command "[Math]rem Abs(((Get-Date !LEN_INP!) - (Get-Date !LEN_OUT!)).TotalSeconds)"'
 					) do (set LEN_DIFF=%%g)
 				
 				echo Input file: !LEN_INP! - Output file: !LEN_OUT!
@@ -455,8 +483,8 @@ if defined par_updated-from (
 						)
 						echo %icongreen% ^| %formatend% Safely proceeding with input file recycling...
 						if exist "!INPUTFILE!" (
-							::delete to recycle bin
-							powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
+							rem delete to recycle bin
+							powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]rem DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
 						)
 					)
 				)
@@ -498,13 +526,13 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	if /i "%par_silent%"=="true" (call:CtrlExit 2)
 	echo The program will now restart.
 	call:GrayPause
-	(goto) 2>nul & "%~f0"
+	exit -1
 	
 :CtrlExit
-	if defined par_selfwrapped (
+	if "%par_selfwrapped%"=="true" (
 		exit 101%~1
 	)
-	:: go one level up (out of subroutine), then exit
+	rem go one level up (out of subroutine), then exit
 	(goto) 2>nul || exit /b %~1
 	
 :GrayPause
@@ -535,6 +563,6 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	cls
 	set "message=%~1"
 	if defined message (set "message=- %message% ")
-	echo [7m Batch Encoder %CurrentVersion% %message%%formatend%
+	echo [7m Batch Encoder %CurrentVersion% %message%%formatend% (%starttime%) (%allargs%)
 	echo.
 	goto:eof
