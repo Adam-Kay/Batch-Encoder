@@ -17,7 +17,7 @@ Grab the `b-e.updater.bat` file, either from Releases or by clicking [here](http
 
 Alternatively, this may be downloaded in a Windows terminal with the following command:
   ```pwsh
-  curl -L --ssl-no-revoke -o updater.bat "https://github.com/Adam-Kay/Batch-Encoder/releases/latest/download/b-e.updater.bat"
+  curl.exe -L --ssl-no-revoke -o updater.bat "https://github.com/Adam-Kay/Batch-Encoder/releases/latest/download/b-e.updater.bat"
   ```
 ### C) Manual Download
 Download the <code>batch.encoder.v`x`.`x`.`x`.bat</code> file from Releases. Place it in the desired folder, delete any older versions you have, and run.
