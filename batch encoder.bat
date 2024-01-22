@@ -1,4 +1,4 @@
-@echo off
+@echo on
 setlocal enabledelayedexpansion
 
 set CurrentVersion=v1.7.3
@@ -49,35 +49,40 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 	)
 
 if not "%par_selfwrapped%"=="true" (
-	cmd /c ""%~f0" %* --selfwrapped" || (set "wraperror=true")
-	echo UNWRAPPED ^(!errorlevel!^)
-	echo Returning to instance %starttime%
+	start /wait "" /b "%~f0" %* --selfwrapped
+	echo UNWRAPPED ^(!wraperror!^) ^(!errorlevel!^)
+	echo Returning to instance !starttime!
 	echo Currentargs: %*
 	echo Currentargs2: !allargs!
-	if "!wraperror!"=="true" (
-		<%TEMP%\batch_update.tmp set /p "newfilename="
-		echo newfilename: !newfilename!
+	echo Selfwrapped: !par_selfwrapped!
+	<%TEMP%\batch_update.tmp set /p "newfilename="
+	echo newfilename: !newfilename!
+	pause
+	rem If errorlevel is negative, it's a restart command:
+	rem Standard restart
+	if "!errorlevel!"=="-1" (
+		echo ERROR -1 - RESTART REQUESTED
+		echo restarting "%~f0"
 		pause
-		rem If errorlevel is negative, it's a restart command:
-		rem Standard restart
-		if "!errorlevel!"=="-1" (
-			echo ERROR MINUS 1 - RESTART REQUESTED
-			pause
-			"%~f0"
-		)
-		rem Restart after update
-		if "!errorlevel!"=="-2" (!newfilename! --updated-from "%~f0")
-		rem Restart after update (with silent, so passing previous args)
-		rem if "!errorlevel!"=="-3" ((goto) 2>nul & !newfilename! --updated-from "%~f0" %* --update false --selfwrapped false)
-		
-		rem If errorlevel starts with 101, it's already been handled
-		if "!errorlevel:~0,3!"=="101" (
-			set "errorlevel=!errorlevel:~3!"
-		) else (
-			call:CritError "Wrapper critically exited with error code !errorlevel!."
-		)
+		cmd /c "%~f0" & exit /b
 	)
-	echo about to exit with code !errorlevel!
+	rem Restart after update
+	if "!errorlevel!"=="-2" (
+		rem !newfilename! --updated-from "%~f0"
+		echo cmd /c ""!newfilename:"=!"" --updated-from "%~f0" ^& exit /b
+		cmd /c @"!newfilename:"=!" --updated-from "%~f0" & exit /b
+	)
+	rem Restart after update (with silent, so passing previous args)
+	rem if "!errorlevel!"=="-3" ((goto) 2>nul & !newfilename! --updated-from "%~f0" %* --update false --selfwrapped false)
+	
+	rem If errorlevel starts with 101, it's already been handled
+	if "!errorlevel:~0,3!"=="101" (
+		set "errorlevel=!errorlevel:~3!"
+	) else (
+		echo ABOUT TO CALL CRIT ERROR
+		call:CritError "Wrapper critically exited with error code !errorlevel!."
+	)
+	echo instance %starttime% about to exit with code !errorlevel!
 	exit /b !errorlevel!
 )
 
@@ -244,7 +249,8 @@ if defined par_updated-from (
 		rem (goto) 2>nul & (goto) 2>nul & "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" %* --update false --selfwrapped false
 		rem cmd /c ""batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0" %* --update false --selfwrapped false" & exit
 	) else (
-		exit -2
+		rem exit -2
+		(goto) 2>nul & cmd /c ""batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0""
 		rem "batch encoder %UpdateVersion%%append%.bat" --updated-from "%~f0"
 	)
 	
@@ -502,7 +508,7 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 
 :EndPause
 	call:GrayPause
-	exit /b 0
+	call:CtrlExit 0
 	
 :CritError
 	timeout /t 1 > nul
@@ -514,6 +520,7 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	if defined errmsg (echo Error message provided: %errmsg%)
 	call:GrayPause
 	call:CtrlExit 3
+	goto:eof
 	
 :AutoUpdateError
 	if exist "%updateFileName%" (del "%updateFileName%")
@@ -527,13 +534,17 @@ if %TOTAL% equ 0 (echo [100;37m No files found. %formatend%)
 	echo The program will now restart.
 	call:GrayPause
 	exit -1
+	goto:eof
 	
 :CtrlExit
 	if "%par_selfwrapped%"=="true" (
+		echo SAFE EXIT
 		exit 101%~1
 	)
+	echo UNKNOWN
 	rem go one level up (out of subroutine), then exit
 	(goto) 2>nul || exit /b %~1
+	goto:eof
 	
 :GrayPause
 	echo %textgray%
