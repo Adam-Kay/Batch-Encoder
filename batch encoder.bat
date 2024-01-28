@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 
-set CurrentVersion=v1.7.2
+set CurrentVersion=v1.7.3
 cls
 
 set "icongray=[7;90m"
@@ -25,7 +25,7 @@ for %%G in (%*) DO (if "%%G"=="--debug" (set "par_debug=true" & goto ArgParser))
 	set "FLAG=0"
 	for %%G in (%*) DO (
 		set ARG=%%G
-		:: if FLAG, record the flag name
+		rem if FLAG, record the flag name
 		echo !ARG! | findstr "\--" > nul && (
 			if not ["!FLAG!"]==["0"] ( rem Check if FLAG is set - if it is, then previous was a boolean.
 				set "par_!FLAG!=true"
@@ -50,7 +50,7 @@ if "%par_debug%"=="true" (pause)
 cls
 
 if defined par_help (
-	::list help for args, then exit
+	rem list help for args, then exit
 	echo %formatend%Help for Batch Encoder %CurrentVersion%
 	echo Program usage:
 	echo.
@@ -84,7 +84,7 @@ if defined par_help (
 if defined par_updated-from (
 	echo %icongray% ^^! %formatend% Just updated^^! Running cleanup...
 	timeout /nobreak 2 > nul
-	::↓ special format to remove " from string
+	rem ↓ special format to remove " from string
 	if exist "%par_updated-from:"=%" (del "%par_updated-from:"=%")
 )
 
@@ -174,7 +174,7 @@ if defined par_updated-from (
 		echo %iconyellow% ^^! %formatend% Differing version found^^! ^(%textred%%CurrentVersion%%formatend% -^> %textgreen%%UpdateVersion%%formatend%^)
 		echo Proceeding with update in 5 seconds; close window to cancel.
 	)
-	:: ... anim
+	rem ... anim
 	echo. & echo [s
 	for /l %%x in (1, 1, 6) do (
 		timeout /nobreak /t 1 > nul
@@ -440,7 +440,7 @@ if defined par_updated-from (
 					) else (
 						if not "%par_waste%"=="recycle" (echo --waste argument "%par_waste%" not recognized. Defaulting to "recycle". & echo.)
 						echo %icongreen% ^| %formatend% Safely proceeding with input file recycling...
-						::delete to recycle bin
+						rem delete to recycle bin
 						powershell -Command "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile('%CD%\!INPUTFILE!','OnlyErrorDialogs','SendToRecycleBin')"
 					)
 				)
